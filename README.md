@@ -1,2 +1,3 @@
 # capybara-interpreter
-An interpreter for my programming language: Capybara.
+
+WIP interpreter for a programming language called Capybara
