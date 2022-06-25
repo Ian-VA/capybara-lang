@@ -53,3 +53,8 @@ void lexer(std::string input)
     tokens.push_back(endinput);
 
 }
+
+int main()
+{
+    
+}
