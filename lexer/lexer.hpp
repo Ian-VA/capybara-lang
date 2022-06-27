@@ -19,17 +19,21 @@ enum type
     ENDINPUT
 };
 
-struct LEXER
+class LEXER
 {
-    int l_paren_num = 0;
-    int r_paren_num = 0;
-    int rsq_br_num = 0;
-    int lsq_br_num = 0;
+    int lparennum = 0;
+    int rparennum = 0;
+    int rsqbrnum = 0;
+    int lsqbrnum = 0;
     int rcurly = 0;
     int lcurly = 0;
-    std::string l_error;
     char ahead;
-    std::string l_location;
+};
+
+class ERROR : public LEXER
+{
+    std::string location;
+    std::string type_of_error;
 };
 
 struct Token
