@@ -5,9 +5,9 @@
 #include "lexer.hpp"
 #include "utilfunctions.hpp"
 
-void lexer(std::string input)
+LEXER lexer(std::string input)
 {
-    LEXER lexer;
+    LEXER lexer_obj;
     int str_position = 0;
     std::vector<Token> tokens;
     std::string_view in = static_cast<std::string_view>(input);
@@ -54,5 +54,4 @@ int main()
     std::string input = "**+*+";
     lexer(input);
 }
-
 
