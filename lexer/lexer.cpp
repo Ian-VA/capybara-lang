@@ -7,9 +7,11 @@
 
 void lexer(std::string input)
 {
+    LEXER lexer;
     int str_position = 0;
     std::vector<Token> tokens;
     std::string_view in = static_cast<std::string_view>(input);
+
 
     while (str_position < input.length()){
         char currentpos = in[str_position];
@@ -40,17 +42,17 @@ void lexer(std::string input)
 
     Token endinput;
     endinput.types = type::ENDINPUT;
+    endinput.value = 'E';
     tokens.push_back(endinput);
 
     print_tokens(tokens);
 
 }
 
-
 int main()
 {
-    std::string input = "*+";
-    std::cout << input.length() << "\n";
+    std::string input = "**+*+";
     lexer(input);
 }
+
 
