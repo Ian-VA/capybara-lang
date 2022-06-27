@@ -17,7 +17,10 @@ void print_tokens(std::vector<Token> all_tokens)
 
 bool check_if_bool(Token token)
 {
-    return token.types == true;
+    if (token.types != type::FALSE && token.types != type::TRUE){
+        return false;
+    }
+    return true;
 }
 
 
