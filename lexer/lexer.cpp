@@ -5,53 +5,65 @@
 #include "lexer.hpp"
 #include "utilfunctions.hpp"
 
-LEXER lexer(std::string input)
+
+
+LEXER unique_objects(std::string_view input)
+{
+    LEXER lexer;
+    return lexer;
+}
+
+void print_tokens(Token token)
+{
+    std::cout << token << "\n";
+}
+
+Token return_one_token(std::string input)
 {
     LEXER lexer_obj;
     int str_position = 0;
-    std::vector<Token> tokens;
-    std::string_view in = static_cast<std::string_view>(input);
+    lexer_obj.m_input = static_cast<std::string_view>(input);
+    bool ispace = isspace(lexer_obj.current_char());
+    bool isdigit = std::isdigit(lexer_obj.current_char());
 
+    if(ispace){
+        lexer_obj.advance();
+    }
 
-    while (str_position < input.length()){
-        char currentpos = in[str_position];
-        bool ispace = isspace(currentpos);
-        bool isdigit = std::isdigit(currentpos);
-
-        if (currentpos == '+'){
-            tokens.push_back(Token{
-                    type::PLUS,
-                    '+'
-                });
-            str_position += 1;
-        } else if (currentpos == '*'){
-            tokens.push_back(Token{
-                    type::TIMES,
-                    '*'
-                });
-            str_position += 1;
+    switch(lexer_obj.current_char())
+    {
+        case '+':
+        {
+            lexer_obj.advance();
+            return Token {type::PLUS, "+"};
+            
         }
-
-        if (ispace){
-            str_position += 1;
-        } else if (isdigit){
-            str_position += 1;
+        case '*':
+        {
+            lexer_obj.advance();
+            return Token {type::TIMES, "*"};
+        }
+        case '=':
+        {
+            lexer_obj.advance();
+            switch(lexer_obj.current_char())
+            {
+                case '=':
+                    return Token {type::EQUALSEQUALS, "=="};
+                default:
+                    return Token {type::ASSIGN, "="};
+            }
         }
 
     }
 
-    Token endinput;
-    endinput.types = type::ENDINPUT;
-    endinput.value = 'E';
-    tokens.push_back(endinput);
-
-    print_tokens(tokens);
+    return Token {type::ENDINPUT, "EOF"};
 
 }
 
 int main()
 {
-    std::string input = "**+*+";
-    lexer(input);
+    std::string input = "==";
+    print_tokens(return_one_token(input));
 }
 
