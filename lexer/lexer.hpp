@@ -8,12 +8,18 @@ enum type
     ASSIGN,
     COMPARE,
     NUM,
+    AND,
     PLUS,
+    PLUSEQUALS,
     TIMES,
     TIMESEQUALS,
     EQUALSEQUALS,
+    NOT,
+    NOTEQUAL,
     FALSE,
     TRUE,
+    VAR,
+    REFERENCE,
     IDENTIFIER,
     LPAREN,
     RPAREN,
@@ -21,8 +27,9 @@ enum type
     LSQBR,
     RCURLY,
     LCURLY,
-    FUNCTION,
-    ENDINPUT
+    ENDINPUT,
+    FUNC,
+    CONST
 };
 
 struct Token
@@ -39,6 +46,7 @@ class LEXER : public Token
         char ahead;
         std::vector<Token> res;
         std::string_view m_input;
+        Token m_last_token;
         int m_index = 0;
         size_t m_size;
 
@@ -79,5 +87,7 @@ std::ostream& operator<<(std::ostream& os, const Token& tk)
 
 
 #endif
+
+
 
 
