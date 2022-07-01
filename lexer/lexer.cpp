@@ -59,7 +59,6 @@ Token check_if_keyword(std::string input)
     }
 }
 
-
 Token build_token(std::string_view input)
 {
     LEXER lexer_obj;
@@ -168,30 +167,38 @@ Token build_token(std::string_view input)
 
 std::vector<Token> build_all(std::string input)
 {
+    LEXER lexer_object;
     const int size = input.length();
-    char new_input[size + 1];
-    strcpy(new_input, input.c_str());
+    lexer_object.m_input = input;
     std::vector<Token> all_tokens;
 
-    char *ptr = strtok(new_input, " ");
-
-    while(ptr != NULL)
+    while (true)
     {
-        all_tokens.push_back(build_token(ptr));
-        ptr = strtok(NULL, " ");
+        Token token = build_token(input);
+        size_t position = input.find(token.value);
+        all_tokens.push_back(token);
+
+        if (position != std::string::npos){
+            input.erase(position, token.value.length());
+        }
+
+        if(token.types == type::ENDINPUT){
+            break;
+        }
     }
 
-    for (auto i : all_tokens)
-    {
-        std::cout << i;
+    for (auto i : all_tokens){
+        std::cout << i << "\n";
     }
+
 
     return all_tokens;
+
 }
 
 
 int main()
 {
-    std::string input = "";
+    std::string input = "{[(1)]}";
     build_all(input);
 }
