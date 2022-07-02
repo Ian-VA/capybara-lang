@@ -10,7 +10,10 @@ enum type
     NUM,
     AND,
     PLUS,
+    SUBTRACT,
+    SUBTRACTEQUALS,
     PLUSEQUALS,
+    DIVISION,
     TIMES,
     TIMESEQUALS,
     EQUALSEQUALS,
@@ -87,7 +90,4 @@ std::ostream& operator<<(std::ostream& os, const Token& tk)
 
 
 #endif
-
-
-
 
