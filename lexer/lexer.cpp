@@ -63,12 +63,11 @@ Token build_token(std::string_view input)
 {
     LEXER lexer_obj;
     lexer_obj.m_input = input;
-    bool ispace = isspace(lexer_obj.current_char()); 
     bool isdigit = std::isdigit(lexer_obj.current_char());
 
     if (lexer_obj.m_index >= lexer_obj.m_input.size()){
         return Token {type::ENDINPUT, "EOF"};
-    } else if (ispace){
+    } else if (lexer_obj.current_char() == ' '){
         lexer_obj.advance();
     } else if (isdigit){
         std::string digit;
@@ -96,8 +95,6 @@ Token build_token(std::string_view input)
 
     switch(lexer_obj.current_char())
     {
-        case ' ':
-            lexer_obj.advance();
         case '+':
             lexer_obj.advance();
             switch(lexer_obj.current_char())
@@ -168,27 +165,35 @@ Token build_token(std::string_view input)
 std::vector<Token> build_all(std::string input)
 {
     LEXER lexer_object;
-    const int size = input.length();
+    lexer_object.m_index = 0;
     lexer_object.m_input = input;
+
     std::vector<Token> all_tokens;
 
     while (true)
     {
         Token token = build_token(input);
         size_t position = input.find(token.value);
+        size_t space_pos = input.find(" ");
+
         all_tokens.push_back(token);
 
         if (position != std::string::npos){
             input.erase(position, token.value.length());
         }
 
+        input.erase(remove(input.begin(), input.end(), ' '), input.end());
+
         if(token.types == type::ENDINPUT){
             break;
         }
+
+        lexer_object.m_index++;
+
     }
 
     for (auto i : all_tokens){
-        std::cout << i << "\n";
+        std::cout << i;
     }
 
 
@@ -199,6 +204,6 @@ std::vector<Token> build_all(std::string input)
 
 int main()
 {
-    std::string input = "{[(1)]}";
+    std::string input = " func hi {{}";
     build_all(input);
 }
