@@ -165,9 +165,7 @@ Token build_token(std::string_view input)
 std::string removeSpaces(std::string &str)
 {
     int n = str.length();
- 
     int i = 0, j = -1;
- 
     bool spaceFound = false;
  
     while (++j < n && str[j] == ' ');
