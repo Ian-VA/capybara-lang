@@ -47,7 +47,6 @@ class LEXER : public Token
 {
     public:
         char ahead;
-        std::vector<Token> res;
         std::string_view m_input;
         Token m_last_token;
         int m_index = 0;
@@ -90,4 +89,6 @@ std::ostream& operator<<(std::ostream& os, const Token& tk)
 
 
 #endif
+
+
 
