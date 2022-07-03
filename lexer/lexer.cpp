@@ -45,15 +45,15 @@ Token check_if_keyword(std::string input)
     switch(Type)
     {
         case type::TRUE:
-            return Token {type::TRUE, input};
+            return Token {Type, input};
         case type::FALSE:
-            return Token {type::FALSE, input};
+            return Token {Type, input};
         case type::VAR:
-            return Token {type::VAR, input};
+            return Token {Type, input};
         case type::FUNC:
-            return Token {type::FUNC, input};
+            return Token {Type, input};
         case type::CONST:
-            return Token {type::CONST, input};
+            return Token {Type, input};
         default:
             return Token {type::IDENTIFIER, input};
     }
@@ -162,10 +162,55 @@ Token build_token(std::string_view input)
 
 }
 
+std::string removeSpaces(std::string &str)
+{
+    int n = str.length();
+ 
+    int i = 0, j = -1;
+ 
+    bool spaceFound = false;
+ 
+    while (++j < n && str[j] == ' ');
+ 
+    while (j < n)
+    {
+        if (str[j] != ' ')
+        {
+            if ((str[j] == '.' || str[j] == ',' ||
+                 str[j] == '?') && i - 1 >= 0 &&
+                 str[i - 1] == ' '){
+                    str[i - 1] = str[j++];
+                 } else {
+                    str[i++] = str[j++];
+                 }
+
+            spaceFound = false;
+        }
+        else if (str[j++] == ' ')
+        {
+            if (!spaceFound)
+            {
+                str[i++] = ' ';
+                spaceFound = true;
+            }
+        }
+    }
+    if (i <= 1){
+        str.erase(str.begin() + i, str.end());
+    } else {
+        str.erase(str.begin() + i - 1, str.end());
+    }
+
+    return str;
+}
+
 std::vector<Token> build_all(std::string input)
 {
     LEXER lexer_object;
     lexer_object.m_index = 0;
+    input.push_back(' ');
+    input = removeSpaces(input);
+
     lexer_object.m_input = input;
 
     std::vector<Token> all_tokens;
@@ -174,7 +219,6 @@ std::vector<Token> build_all(std::string input)
     {
         Token token = build_token(input);
         size_t position = input.find(token.value);
-        size_t space_pos = input.find(" ");
 
         all_tokens.push_back(token);
 
@@ -182,13 +226,13 @@ std::vector<Token> build_all(std::string input)
             input.erase(position, token.value.length());
         }
 
-        input.erase(remove(input.begin(), input.end(), ' '), input.end());
-
         if(token.types == type::ENDINPUT){
             break;
         }
 
         lexer_object.m_index++;
+        input.erase(remove(input.begin(), input.end(), ' '), input.end());
+
 
     }
 
@@ -204,6 +248,6 @@ std::vector<Token> build_all(std::string input)
 
 int main()
 {
-    std::string input = " func hi {{}";
+    std::string input = "func hello {}";
     build_all(input);
 }
