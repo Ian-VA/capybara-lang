@@ -38,7 +38,10 @@ Token check_if_keyword(std::string input)
         {"false", type::FALSE},
         {"var", type::VAR},
         {"func", type::FUNC},
-        {"const", type::CONST}
+        {"const", type::CONST},
+        {"if", type::IF},
+        {"elseif", type::ELSEIF},
+        {"else", type::ELSE}
     };
 
     type Type = mapStringtoType[input];
@@ -53,6 +56,12 @@ Token check_if_keyword(std::string input)
         case type::FUNC:
             return Token {Type, input};
         case type::CONST:
+            return Token {Type, input};
+        case type::IF:
+            return Token {Type, input};
+        case type::ELSEIF:
+            return Token {Type, input};
+        case type::ELSE:
             return Token {Type, input};
         default:
             return Token {type::IDENTIFIER, input};
@@ -134,6 +143,36 @@ Token build_token(std::string_view input)
                     return Token {type::SUBTRACTEQUALS, "-="};
                 default:
                     return Token {type::SUBTRACT, "-"};
+            }
+        case '<':
+            lexer_obj.advance();
+            switch(lexer_obj.current_char())
+            {
+                case '=':
+                    return Token {type::LESSTHANOREQUALTO, "<="};
+                default:
+                    return Token {type::LESSTHAN, "<"};
+            }
+        case '>':
+            lexer_obj.advance();
+            switch(lexer_obj.current_char())
+            {
+                case '=':
+                    return Token {type::GREATERTHANOREQUALTO, ">="};
+                default:
+                    return Token {type::GREATERTHAN, ">"};
+            }
+        case '^':
+            lexer_obj.advance();
+            return Token {type::XOR, "^"};
+        case '!':
+            lexer_obj.advance();
+            switch(lexer_obj.current_char())
+            {
+                case '=':
+                    return Token {type::NOTEQUAL, "!="};
+                default:
+                    return Token {type::NOT, "!"};
             }
         case '/':
             lexer_obj.advance();
@@ -246,6 +285,6 @@ std::vector<Token> build_all(std::string input)
 
 int main()
 {
-    std::string input = "func hello {}";
+    std::string input = "var x = 5";
     build_all(input);
 }
