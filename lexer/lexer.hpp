@@ -269,7 +269,6 @@ std::vector<Token> build_all(std::string input)
             break;
         }
 
-        lexer_object.m_index++;        
 
     }
 
