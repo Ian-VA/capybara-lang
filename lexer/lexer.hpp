@@ -281,3 +281,5 @@ std::vector<Token> build_all(std::string input)
     return all_tokens;
 
 }
+
+#endif
