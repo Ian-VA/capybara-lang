@@ -1,8 +1,11 @@
+#ifndef LEXER_HPP
+#define LEXER_HPP
+
 #include <vector>
 #include <iostream>
 #include <string>
 #include <string_view>
-#include "lexer.hpp"
+#include "classes.hpp"
 #include "utilfunctions.hpp"
 #include <regex>
 #include <map>
@@ -27,8 +30,6 @@ Token unique_objects(char current_char, std::string_view input, int index)
                     return Token {type::REFERENCE, "&"};
             }
     }
-
-    return lexer;
 }
 
 Token check_if_keyword(std::string input)
@@ -236,8 +237,7 @@ std::string removeSpaces(std::string &str)
         str.erase(str.begin() + i, str.end());
     } else {
         str.erase(str.begin() + i - 1, str.end());
-    }
-
+    } 
     return str;
 }
 
@@ -247,9 +247,7 @@ std::vector<Token> build_all(std::string input)
     lexer_object.m_index = 0;
     input.push_back(' ');
     input = removeSpaces(input);
-
     lexer_object.m_input = input;
-
     std::vector<Token> all_tokens;
 
     while (true)
@@ -263,13 +261,15 @@ std::vector<Token> build_all(std::string input)
             input.erase(position, token.value.length());
         }
 
+        
+        input.erase(remove(input.begin(), input.end(), ' '), input.end());
+
+
         if(token.types == type::ENDINPUT){
             break;
         }
 
-        lexer_object.m_index++;
-        input.erase(remove(input.begin(), input.end(), ' '), input.end());
-
+        lexer_object.m_index++;        
 
     }
 
@@ -280,11 +280,4 @@ std::vector<Token> build_all(std::string input)
 
     return all_tokens;
 
-}
-
-
-int main()
-{
-    std::string input = "var x = 5";
-    build_all(input);
 }
