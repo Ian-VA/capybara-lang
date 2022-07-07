@@ -42,26 +42,20 @@ Token check_if_keyword(std::string input)
         {"const", type::CONST},
         {"if", type::IF},
         {"elseif", type::ELSEIF},
-        {"else", type::ELSE}
+        {"else", type::ELSE},
+        {"return", type::RETURN}
     };
 
     type Type = mapStringtoType[input];
     switch(Type)
     {
         case type::TRUE:
-            return Token {Type, input};
         case type::FALSE:
-            return Token {Type, input};
         case type::VAR:
-            return Token {Type, input};
         case type::FUNC:
-            return Token {Type, input};
         case type::CONST:
-            return Token {Type, input};
         case type::IF:
-            return Token {Type, input};
         case type::ELSEIF:
-            return Token {Type, input};
         case type::ELSE:
             return Token {Type, input};
         default:
