@@ -1,6 +1,9 @@
-struct Node
+class AST 
 {
-  Node(){
     
-  }
-}
+};
+
+class LiteralNode : public AST
+{
+
+};
