@@ -1,7 +1,13 @@
-#ifndef LEXER_HPP
-#define LEXER_HPP
-#include <string_view>
+#ifndef CLASSES_HPP
+#define CLASSES_HPP
+#include <vector>
+#include <iostream>
 #include <string>
+#include <string_view>
+#include <regex>
+#include <map>
+#include <array>
+
 
 enum type
 {
@@ -15,11 +21,20 @@ enum type
     PLUSEQUALS,
     DIVISION,
     TIMES,
+    LESSTHAN,
+    LESSTHANOREQUALTO,
+    GREATERTHAN,
+    GREATERTHANOREQUALTO,
+    XOR,
+    IF,
+    ELSEIF,
+    ELSE,
     TIMESEQUALS,
     EQUALSEQUALS,
     NOT,
     NOTEQUAL,
     FALSE,
+    RETURN,
     TRUE,
     VAR,
     REFERENCE,
@@ -43,7 +58,7 @@ struct Token
     friend std::ostream& operator<<(std::ostream& os, const Token& tk);
 };
 
-class LEXER : public Token
+class LEXER
 {
     public:
         char ahead;
@@ -89,6 +104,5 @@ std::ostream& operator<<(std::ostream& os, const Token& tk)
 
 
 #endif
-
 
 
