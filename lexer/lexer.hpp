@@ -30,6 +30,7 @@ Token unique_objects(char current_char, std::string_view input, int index)
                     return Token {type::REFERENCE, "&"};
             }
     }
+    return Token {type::ENDINPUT, "EOF"};
 }
 
 Token check_if_keyword(std::string input)
@@ -89,7 +90,7 @@ Token build_token(std::string_view input)
         std::string all_input;
         all_input.push_back(lexer_obj.current_char());
         
-        while (isalpha(lexer_obj.peek()))
+        while (isalpha(lexer_obj.peek()) || std::isdigit(lexer_obj.peek()))
         {
             lexer_obj.advance();
             all_input.push_back(lexer_obj.current_char());
@@ -263,11 +264,8 @@ std::vector<Token> build_all(std::string input)
             break;
         }
 
+        lexer_object.advance();
 
-    }
-
-    for (auto i : all_tokens){
-        std::cout << i;
     }
 
 
