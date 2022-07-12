@@ -1,17 +1,16 @@
-#include "parser.hpp"
+#include "test.hpp"
 #include "lexer.hpp"
+#include <string>
+#include <vector>
 
 
 int main()
 {
     std::string input = "5 + 3";
-    Parser parse;
-    parse.all_tokens = buid_all(input)
+    Parser parses;
+    std::vector<Token> alltokens = build_all(input);
+    parses.all_tokens = alltokens;
+    parses.index = 0;
 
-    while (parse.parse() != Token {type::ENDINPUT, "EOF"} || parser.parse() != ERROR {})
-    {
-        parse.parse();
-    }
-
-    build_all(input);
+    parses.parse();
 }
