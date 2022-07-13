@@ -38,6 +38,8 @@ struct BinaryOperationNode
                 return stoi(left.value) * stoi(right.value);
             case type::SUBTRACT:
                 return stoi(left.value) - stoi(right.value);
+            case type::DIVISION:
+                return stoi(left.value) / stoi(right.value);
         }
     }
     
@@ -83,7 +85,6 @@ struct Parser
     void parse()
     {
         while (get_token().value != "EOF"){
-            std::cout << "hi";
             switch(get_token().types)
             {
                 case type::PLUS:
