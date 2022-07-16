@@ -120,4 +120,3 @@ struct error
     std::string location;
     std::string type_of_error;
 };
-
