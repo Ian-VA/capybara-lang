@@ -4,3 +4,5 @@ WIP interpreter for a dynamically typed, bracketed programming language with Rus
 
 Written in C++ and designed for ease of writing and reading good quality code
 
+Criticism welcome
+
