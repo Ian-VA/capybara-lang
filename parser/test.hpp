@@ -42,6 +42,9 @@ struct BinaryOperationNode
                 return stoi(left.value) / stoi(right.value);
             case type::GREATERTHAN:
                 return stoi(left.value) > stoi(right.value);
+            case type::LESSTHAN:
+                return stoi(left.value) < stoi(right.value)
+            
         }
     }
     
