@@ -196,7 +196,7 @@ Token build_token(std::string_view input)
     }
 
 }
-
+// im sorry
 std::string removeSpaces(std::string &str)
 {
     int n = str.length();
