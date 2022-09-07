@@ -86,7 +86,7 @@ Token build_token(std::string_view input)
         
         uint32_t* digit2 = new uint32_t;
         digit2 = &(std::stoi(digit));
-        return Token {type::NUM, digit};
+        return Token {type::NUM, digit2};
 
     } else if (isalpha(lexer_obj.current_char())){
         std::string all_input;
