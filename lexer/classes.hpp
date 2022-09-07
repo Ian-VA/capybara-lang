@@ -52,7 +52,7 @@ enum type
 
 union S
 {
-    std::vector<int> valuecontainer;
+    uint32_t valueint;
     std::string value;
     
     ~S();
@@ -67,7 +67,7 @@ struct Token
     
     
     template <typename T>
-    Token(type types, std::vector<T> value){
+    Token(type types, uint32_t value){
         this->types = types;
         this->value = valuecontainer;
     }
