@@ -75,13 +75,13 @@ Token build_token(std::string_view input)
     } else if (lexer_obj.current_char() == ' '){
         lexer_obj.advance();
     } else if (isdigit){
-        std::string digit;
-        digit.push_back(lexer_obj.current_char());
+        std::vector<int> digit;
+        digit.push_back(lexer_obj.current_char() - '0');
         
         while (std::isdigit(lexer_obj.peek()))
         {
             lexer_obj.advance();
-            digit.push_back(lexer_obj.current_char());
+            digit.push_back(lexer_obj.current_char() - '0');
         }
 
         return Token {type::NUM, digit};
