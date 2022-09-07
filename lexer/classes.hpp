@@ -52,7 +52,7 @@ enum type
 
 union S
 {
-    uint32_t valueint;
+    uint32_t* valueint = new uint32_t;
     std::string value;
     
     ~S();
@@ -67,7 +67,7 @@ struct Token
     
     
     template <typename T>
-    Token(type types, uint32_t value){
+    Token(type types, uint32_t* value){
         this->types = types;
         this->value = valuecontainer;
     }
@@ -109,12 +109,6 @@ class LEXER
             return m_input[m_index + 1];
         }
     
-};
-
-class ERROR : public LEXER
-{
-    std::string location;
-    std::string type_of_error;
 };
 
 
