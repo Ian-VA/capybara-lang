@@ -50,10 +50,32 @@ enum type
     CONST
 };
 
+union S
+{
+    std::vector<int> valuecontainer;
+    std::string value;
+    
+    ~S();
+    S();
+};
+
 struct Token
 {
     type types;
     std::string value;
+    S valuecontainer;
+    
+    
+    template <typename T>
+    Token(type types, std::vector<T> value){
+        this->types = types;
+        this->value = valuecontainer;
+    }
+    
+    Token (type types, std::string value){
+        this->types = types;
+        this->value = value;
+    }
 
     friend std::ostream& operator<<(std::ostream& os, const Token& tk);
 };
