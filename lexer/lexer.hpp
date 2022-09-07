@@ -75,15 +75,17 @@ Token build_token(std::string_view input)
     } else if (lexer_obj.current_char() == ' '){
         lexer_obj.advance();
     } else if (isdigit){
-        std::vector<int> digit;
-        digit.push_back(lexer_obj.current_char() - '0');
+        std::string digit;
+        digit.push_back(lexer_obj.current_char());
         
         while (std::isdigit(lexer_obj.peek()))
         {
             lexer_obj.advance();
-            digit.push_back(lexer_obj.current_char() - '0');
+            digit.push_back(lexer_obj.current_char());
         }
-
+        
+        uint32_t* digit2 = new uint32_t;
+        digit2 = &(std::stoi(digit));
         return Token {type::NUM, digit};
 
     } else if (isalpha(lexer_obj.current_char())){
