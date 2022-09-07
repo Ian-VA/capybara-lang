@@ -61,6 +61,13 @@ struct Parser
     std::vector<BinaryOperationNode> all_operationnodes;
     std::vector<LiteralNode> all_literalnodes;
     int index = 0;
+    
+    enum errors
+    {
+        LEXER_ERROR,
+        PARSER_ERROR,
+        RUNTIME_ERROR
+    };
 
     Token get_token()
     {
@@ -117,11 +124,13 @@ struct Parser
                     }
             }
         }
+        
     }
 };
 
 struct error
 {
     std::string location;
-    std::string type_of_error;
+    int linenum;
+    errors type_of_error;
 };
