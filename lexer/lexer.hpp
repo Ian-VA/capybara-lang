@@ -100,7 +100,7 @@ Token build_token(std::string_view input)
         return check_if_keyword(all_input);
     }
     
-    // surprisingly, this method of switch statements for lexing has proven to be fast and memory efficient
+    // surprisingly, this method of switch statements for lexing has proven to be relatively fast and memory efficient
 
     switch(lexer_obj.current_char())
     {
