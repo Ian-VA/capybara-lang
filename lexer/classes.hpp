@@ -54,6 +54,9 @@ union S
 {
     uint32_t* valueint = new uint32_t;
     std::string value;
+    char valuechar;
+    double valuedouble;
+    
     
     ~S();
     S();
