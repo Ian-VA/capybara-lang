@@ -67,15 +67,11 @@ struct Token
     
     
     template <typename T>
-    Token(type types, uint32_t* value){
+    Token(type types, T value){
         this->types = types;
         this->value = valuecontainer;
     }
-    
-    Token (type types, std::string value){
-        this->types = types;
-        this->value = value;
-    }
+
 
     friend std::ostream& operator<<(std::ostream& os, const Token& tk);
 };
