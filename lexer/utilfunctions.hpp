@@ -4,16 +4,6 @@
 #include "lexer.hpp"
 #include <iostream>
 
-void print_tokens(std::vector<Token> all_tokens)
-{
-    std::cout << "Vector size: " << all_tokens.size() << '\n';
-    for (auto i : all_tokens)
-    {
-       std::cout << i;
-    }
-
-}
-
 
 bool check_if_bool(Token token)
 {
