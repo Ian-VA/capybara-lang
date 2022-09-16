@@ -23,51 +23,37 @@ struct LiteralNode
 
 };
 
+
 struct BinaryOperationNode
 {
-    LiteralNode left;
-    LiteralNode right;
-    Token operation;
+    BinaryOperationNode* binleft;
+    LiteralNode *left;
+    LiteralNode *right;
+    Token *operations;
 
-    int evaluate(){
-        switch (operation.types)
-        {
-            case type::PLUS:
-                return stoi(left.value) + stoi(right.value);
-            case type::TIMES:
-                return stoi(left.value) * stoi(right.value);
-            case type::SUBTRACT:
-                return stoi(left.value) - stoi(right.value);
-            case type::DIVISION:
-                return stoi(left.value) / stoi(right.value);
-            case type::GREATERTHAN:
-                return stoi(left.value) > stoi(right.value);
-            case type::LESSTHAN:
-                return stoi(left.value) < stoi(right.value)
-            
-        }
+    BinaryOperationNode(BinaryOperationNode *bleft, LiteralNode *right, Token *operation)
+    {
+        this->binleft = bleft;
+        this->right = right;
+        this->operations = operation;
+    }
+
+    BinaryOperationNode(LiteralNode *left, LiteralNode *right, Token *operation)
+    {
+        this->left = left;
+        this->right = right;
+        this->operations = operation;
     }
     
-    std::string represent()
-    {
-        std::string rep = left.value + operation.value + right.value;
-        return rep;
-    }
 };
 
 struct Parser 
 {
-    std::vector<Token> all_tokens;
-    std::vector<BinaryOperationNode> all_operationnodes;
-    std::vector<LiteralNode> all_literalnodes;
+    std::deque<Token> all_tokens;
+    std::deque<BinaryOperationNode> all_operationnodes;
+    std::deque<LiteralNode> all_literalnodes;
     int index = 0;
-    
-    enum errors
-    {
-        LEXER_ERROR,
-        PARSER_ERROR,
-        RUNTIME_ERROR
-    };
+    int binopindex = 0;
 
     Token get_token()
     {
@@ -75,6 +61,11 @@ struct Parser
             return Token {type::ENDINPUT, "EOF"};
         }
         return all_tokens[index];
+    }
+
+    BinaryOperationNode get_last_binop()
+    {
+        return all_operationnodes[binopindex - 1];
     }
 
     Token peek_token()
@@ -103,20 +94,31 @@ struct Parser
                 case type::SUBTRACT:
                 case type::TIMES:
                 case type::DIVISION:
+
                     if (get_last_token().types == type::NUM && peek_token().types == type::NUM){
-                        all_operationnodes.push_back(BinaryOperationNode {
-                            LiteralNode {get_last_token()},
-                            LiteralNode {peek_token()},
-                            get_token(),
-                        });
-                        advance();
+                        LiteralNode literalnode1 = {get_last_token()};
+                        LiteralNode literalnode2 {peek_token()};
+                        Token token = get_token();
+                        BinaryOperationNode newnode = {literalnode1, literalnode2, token};
+                        all_operationnodes.push_back(newnode);
+
+                        for (int i = 0; i < 3; i++){
+                            all_tokens.pop_front();
+                        }
                     } else {
-                        std::cout << "Incorrect use of operand" << get_token().value;
-                        break;
+
+                        all_operationnodes.push_back(BinaryOperationNode {
+                            BinaryOperationNode {get_last_binop()},
+                            LiteralNode {peek_token()},
+                            get_token()
+                        });
+
+                        binopindex++;
                     }
+                    
                 case type::NUM:
                 case type::IDENTIFIER:
-                    if (peek_token().types == (type::PLUS || type::SUBTRACT || type::TIMES || type::DIVISION)){
+                    if (peek_token().types != (type::PLUS || type::SUBTRACT || type::TIMES || type::DIVISION || type::ENDINPUT) ){
                         all_literalnodes.push_back(LiteralNode {get_token()});
                         advance();
                     } else {
@@ -124,13 +126,11 @@ struct Parser
                     }
             }
         }
-        
     }
 };
 
 struct error
 {
     std::string location;
-    int linenum;
-    errors type_of_error;
+    std::string type_of_error;
 };
