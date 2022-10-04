@@ -9,16 +9,17 @@ struct LiteralNode
         }
 
         this->literalnodetype = token.types;
-        this->value = token.value;
+        this->value = std::stoi(token.value);
     }
 
-    std::string represent()
-    {
-        std::string rep = value;
-        return rep;
+    LiteralNode(int num){
+
+        this->literalnodetype = type::NUM;
+        this->value = num;
+
     }
     
-    std::string value;
+    int value;
     type literalnodetype;
 
 };
@@ -26,17 +27,24 @@ struct LiteralNode
 
 struct BinaryOperationNode
 {
-    BinaryOperationNode* binleft;
     LiteralNode *left;
     LiteralNode *right;
     Token *operations;
 
-    BinaryOperationNode(BinaryOperationNode *bleft, LiteralNode *right, Token *operation)
-    {
-        this->binleft = bleft;
-        this->right = right;
-        this->operations = operation;
+    int evaluate(int val1, int val2, Token* operations){
+        switch (operations->types)
+        {
+            case type::PLUS:
+                return val1 + val2;
+            case type::TIMES:
+                return val1 * val2;
+            case type::SUBTRACT:
+                return val1 - val2;
+            case type::DIVISION:
+                return val1 / val2;
+        }
     }
+
 
     BinaryOperationNode(LiteralNode *left, LiteralNode *right, Token *operation)
     {
@@ -96,24 +104,33 @@ struct Parser
                 case type::DIVISION:
 
                     if (get_last_token().types == type::NUM && peek_token().types == type::NUM){
-                        LiteralNode literalnode1 = {get_last_token()};
-                        LiteralNode literalnode2 {peek_token()};
+                        LiteralNode literalnode1(get_last_token());
+                        LiteralNode literalnode2(peek_token());
                         Token token = get_token();
-                        BinaryOperationNode newnode = {literalnode1, literalnode2, token};
+                        BinaryOperationNode newnode(&literalnode1, &literalnode2, &token);
                         all_operationnodes.push_back(newnode);
 
                         for (int i = 0; i < 3; i++){
+                            std::cout << "popped" << "\n";
                             all_tokens.pop_front();
                         }
+                    
                     } else {
+                        
+                        BinaryOperationNode currbinop1 = get_last_binop();
+                        BinaryOperationNode *binop1 = &currbinop1;
+                        LiteralNode *curr_literals = new LiteralNode{binop1->evaluate(binop1->left->value, binop1->right->value, binop1->operations)};
+                        LiteralNode literalnode3(peek_token());
+                        Token token1 = get_token();
+                        BinaryOperationNode currbinop(curr_literals, &literalnode3, &token1);
 
-                        all_operationnodes.push_back(BinaryOperationNode {
-                            BinaryOperationNode {get_last_binop()},
-                            LiteralNode {peek_token()},
-                            get_token()
-                        });
+                        all_operationnodes.push_back(currbinop);
 
                         binopindex++;
+
+                        for (int i = 0; i < 2; i++){
+                            all_tokens.pop_front();
+                        }
                     }
                     
                 case type::NUM:
