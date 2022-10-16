@@ -31,15 +31,14 @@ struct Parser
     int parseSum();
     int parseProduct();
 
-    int parseFactor(Token token)
+    int parseFactor()
     {
-        int data = std::stoi(token.value);
-        std::cout << data << "\n";
-        if (token.types == type::NUM){
+        int data = std::stoi(get_token().value);
+        if (get_token().types == type::NUM){
             eat();
             return data;
         } else {
-            std::cout << "Expected digit, got " << token.value << " instead" << "\n";
+            std::cout << "Expected digit, got " << get_token().value << " instead" << "\n";
             return 0;
         }
     }
