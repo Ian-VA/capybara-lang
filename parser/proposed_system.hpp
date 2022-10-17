@@ -29,7 +29,18 @@ struct Parser
     }
 
     int parseSum();
-    int parseProduct();
+    int parseProduct()
+    {
+        int fac1 = parseFactor();
+        
+        while (get_token().types == type::TIMES){
+            eat();
+            int fac2 = parseFactor();
+            fac1 *= fac2;
+        }
+
+        return fac1;
+    }
 
     int parseFactor()
     {
