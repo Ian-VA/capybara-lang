@@ -28,7 +28,19 @@ struct Parser
         all_tokens.pop_front();
     }
 
-    int parseSum();
+    int parseSum()
+    {
+        int pr1 = parseProduct();
+
+        while (get_token().types == type::PLUS){
+            eat();
+            int pr2 = parseProduct();
+            pr1 = pr1 + pr2;
+        }
+
+        return pr1;
+    }
+
     int parseProduct()
     {
         int fac1 = parseFactor();
@@ -44,13 +56,25 @@ struct Parser
 
     int parseFactor()
     {
-        int data = std::stoi(get_token().value);
         if (get_token().types == type::NUM){
+            int data = std::stoi(get_token().value);
             eat();
             return data;
+
+        } else if (get_token().types == type::LPAREN){
+            eat(); // consume (
+            int sum = parseSum();
+            
+            if (get_token().types != type::RPAREN){
+                std::cout << "Expected RPAREN, got " << get_token().value << " instead" << "\n";
+                return NULL;
+            }
+
+            return sum;
+
         } else {
             std::cout << "Expected digit, got " << get_token().value << " instead" << "\n";
-            return 0;
+            return NULL;
         }
     }
 
