@@ -7,6 +7,8 @@ struct Parser
 {
     std::deque<Token> all_tokens;
     int index = 0;
+    std::vector<int> values;
+    std::vector<std::string> identifiers;
 
     Token get_token()
     {
@@ -26,6 +28,28 @@ struct Parser
 
     void eat(){
         all_tokens.pop_front();
+    }
+
+    int parseInt()
+    {
+
+        if (get_token().types == type::VAR){
+            for (int i = 0; i < 3; i++)
+            {
+                eat();
+
+                if (get_token().types == type::IDENTIFIER){
+                    std::string identifier = get_token().value;
+                    identifiers.push_back(identifier); 
+                    values.push_back(parseSum());
+                }
+            }
+        }
+        
+
+        int value1 = parseSum();
+        
+        return value1;
     }
 
     int parseSum()
@@ -72,13 +96,10 @@ struct Parser
 
             return sum;
 
-        } else {
-            std::cout << "Expected digit, got " << get_token().value << " instead" << "\n";
+        } else if (get_token().types == type::IDENTIFIER){
             return NULL;
         }
     }
-
-
 
 };
 
