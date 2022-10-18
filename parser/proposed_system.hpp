@@ -2,6 +2,7 @@
 #define PARSERFUNCTIONS_HPP
 
 #include "classes.hpp"
+#include "utilfunctions.hpp"
 
 struct Parser 
 {
@@ -63,6 +64,29 @@ struct Parser
         }
 
         return pr1;
+    }
+
+    void parseifstatement()
+    {
+        if (get_token().types == type::IF){
+
+        }
+    }
+
+    bool parsevalidbool()
+    {
+        Token condition1 = get_token();
+        eat();
+
+        if (get_token().types == type::EQUALSEQUALS){
+            return condition1.value == get_token().value;
+        } else if (get_token().types == type::NOTEQUAL){
+            return condition1.value != get_token().value;
+        } else if (check_if_bool(get_token())) {
+            return get_token().value;
+        } else {
+            return false;
+        }
     }
 
     int parseProduct()
