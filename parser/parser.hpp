@@ -66,7 +66,7 @@ class binaryoperation : public astnode
 class variabledeclaration : public astnode
 {
     private:
-        std::string variabletype, value;
+        std::string variabletype, value, identifier;
     public:
 
         astnodetype get_type(){
