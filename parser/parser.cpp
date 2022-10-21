@@ -58,7 +58,12 @@ astnode* parserclass::parseOperation()
             }
           
         }
-    }
+    } 
+}
+
+astnode* parseIfStatement()
+{
+    
 }
 
 
