@@ -51,11 +51,14 @@ class binaryoperation : public astnode
 {
     private:
         std::string operation;
+        integerliteral* left, right;
     public:
 
-        binaryoperation(Token tok)
+        binaryoperation(std::string operations, integerliteral* lefts, integerliteral* rights)
         {
-            this->operation = tok.value;
+            this->operations = operation;
+            this->lefts = left;
+            this->rights = right;
         }
 
         std::string get_operation(){
@@ -99,10 +102,13 @@ struct parserclass
         all_tokens.pop_front();
     }
 
-    astnode parseInteger();
-    astnode parseVariable();
-    astnode parseOperation();
-
+    astnode* parseInteger();
+    astnode* parseVariable();
+    astnode* parseOperation();
+    astnode* parseIfStatement();
+    astnode* parseWhileLoop();
+    astnode* parseSwitchStatement();
+    
 
 
 };
