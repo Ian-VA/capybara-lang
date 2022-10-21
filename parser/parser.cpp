@@ -4,6 +4,10 @@
 // todo : a lot
 astnode parserclass::parseInteger(Token tok)
 {
+    if (tok.type != type::INTEGER){
+        std::cout << "Expected integer, got " << tok.type << "\n";
+        return NULL;
+    }
     return integerliteral {tok};
 }
 
