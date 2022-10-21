@@ -8,12 +8,15 @@ astnode* parserclass::parseInteger()
         std::cout << "Expected integer, got " << get_token().value << "\n";
         return NULL;
     }
-    return *integerliteral {get_token()};
+    
+    eat();
+    
+    return integerliteral {get_token()};
 }
 
 astnode* parserclass::parseVariable()
 {
-  if (tok.type == type::VAR){
+  if (get_token().type == type::VAR){
       eat();
       
       if (get_token().type != type::IDENTIFIER){
@@ -28,14 +31,34 @@ astnode* parserclass::parseVariable()
       
       
       
-      return *variable {identifier, value};
+      return variable {identifier, value};
       
   }  
 }
 
-astnode parserclass::parseOperation()
+astnode* parserclass::parseOperation()
 {
-
+    if (get_token().type == type::INTEGER){
+        integerliteral *right = parseInteger();
+        
+        if (get_token().type != (type::PLUS || type::SUBTRACT || type::TIMES || type::DIVISION)){
+            std::cout << "Expected operation, got " << get_token().value << "\n";
+            return NULL;
+        } else {
+            std::string operation = get_token().value;
+            eat();
+            
+            if (get_token().type != type::INTEGER){
+                std::cout << "Expected integer after: " << operation << " got " << get_token().value << " instead" << "\n";
+                return NULL;
+            } else {
+                integerliteral *left = parseInteger();
+                
+                return binaryoperation {operation, right, left};
+            }
+          
+        }
+    }
 }
 
 
