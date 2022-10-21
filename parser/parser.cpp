@@ -2,18 +2,35 @@
 #include "lexer.hpp"
 #include <deque>
 // todo : a lot
-astnode parserclass::parseInteger(Token tok)
+astnode* parserclass::parseInteger()
 {
-    if (tok.type != type::INTEGER){
-        std::cout << "Expected integer, got " << tok.type << "\n";
+    if (get_token().type != type::INTEGER){
+        std::cout << "Expected integer, got " << get_token().value << "\n";
         return NULL;
     }
-    return integerliteral {tok};
+    return *integerliteral {get_token()};
 }
 
-astnode parserclass::parseVariable()
+astnode* parserclass::parseVariable()
 {
-
+  if (tok.type == type::VAR){
+      eat();
+      
+      if (get_token().type != type::IDENTIFIER){
+          std::cout << "Expected identifier after VAR, got " << get_token().value << "\n";
+          return NULL;
+      } else {
+          std::string identifier = get_token().value;
+      }
+      
+      eat();
+      std::string value = get_token().value;
+      
+      
+      
+      return *variable {identifier, value};
+      
+  }  
 }
 
 astnode parserclass::parseOperation()
@@ -30,6 +47,6 @@ int main()
     parses.index = 0;
 
     for (int i = 0; i < alltokens.size(); i++){
-
+        
     }
 }
