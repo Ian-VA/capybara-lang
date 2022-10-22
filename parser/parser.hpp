@@ -150,6 +150,7 @@ struct parserclass
 
     std::unique_ptr<astnode> parseStatement();
     std::unique_ptr<astnode> parseExpression();
+    std::unique_ptr<astnode> parseGroupedExpr();
 
     std::unique_ptr<integerliteral> parseInteger();
     std::unique_ptr<variabledeclaration> parseVariable();
