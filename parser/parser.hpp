@@ -4,6 +4,8 @@
 #include "classes.hpp"
 #include "utilfunctions.hpp"
 
+class Visitor;
+
 enum astnodetype
 {
     operation,
@@ -13,6 +15,7 @@ enum astnodetype
     ifstatement,
     boolean,
     null,
+    comparison,
     functioncall,
     functiondeclaration,
 };
@@ -23,6 +26,7 @@ class astnode
         virtual astnodetype get_type(){
             return astnodetype::null;
         }
+
     private:
         std::string value;
 
@@ -43,6 +47,8 @@ class integerliteral : public astnode
         virtual astnodetype get_type() {
             return astnodetype::integer;
         }
+
+        void accept(Visitor& visitor);
 
         std::string get_value(){
             return value;
@@ -69,6 +75,9 @@ class binaryoperation : public astnode
             this->right = std::move(rights);
         }
 
+        void accept(Visitor& visitor);
+
+
         std::string get_operation(){
             return operation;
         }
@@ -87,9 +96,30 @@ class variabledeclaration : public astnode
             this->value = values;
         }
 
+
+        void accept(Visitor& visitor);
+
+
+        std::string get_identifier()
+        {
+            return identifier;
+        }
+
+        std::string get_value()
+        {
+            return value;
+        }
+
+
+        std::string getvariabletype()
+        {
+            return std::string("placeholder");
+        }
+
         virtual astnodetype get_type(){
             return astnodetype::variable;
         }
+
 };
 
 struct parserclass
@@ -118,9 +148,15 @@ struct parserclass
         all_tokens.pop_front();
     }
 
+    std::unique_ptr<astnode> parseStatement();
+    std::unique_ptr<astnode> parseExpression();
+
     std::unique_ptr<integerliteral> parseInteger();
-    std::unique_ptr<astnode> parseVariable();
+    std::unique_ptr<variabledeclaration> parseVariable();
     std::unique_ptr<astnode> parseOperation();
+    std::unique_ptr<astnode> parseFactor();
+
+    std::unique_ptr<astnode> parseComparison();
     std::unique_ptr<astnode> parseIfStatement();
     std::unique_ptr<astnode> parseWhileLoop();
     std::unique_ptr<astnode> parseSwitchStatement();
@@ -128,5 +164,11 @@ struct parserclass
 
 
 };
+
+std::ostream& operator<<(std::ostream& os, const std::unique_ptr<variabledeclaration> variable)
+{
+    os << "REPRESENT VARIABLE" << "\n" << "TYPE: " << variable->getvariabletype() << "\n" << "IDENTIFIER: " << variable->get_identifier() << "\n" << "VALUE: " << variable->get_value() << "\n";
+    return os;
+}
 
 #endif
