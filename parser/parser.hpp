@@ -39,7 +39,7 @@ class integerliteral : public astnode
         }
 
         astnodetype get_type() {
-            return astnodetype::integerliteral;
+            return astnodetype::integer;
         }
 
         std::string get_value(){
@@ -51,14 +51,15 @@ class binaryoperation : public astnode
 {
     private:
         std::string operation;
-        integerliteral* left, right;
+        integerliteral* left;
+        integerliteral* right;
     public:
 
         binaryoperation(std::string operations, integerliteral* lefts, integerliteral* rights)
         {
-            this->operations = operation;
-            this->lefts = left;
-            this->rights = right;
+            this->operation = operations;
+            this->left = lefts;
+            this->right = rights;
         }
 
         std::string get_operation(){
@@ -113,4 +114,4 @@ struct parserclass
 
 };
 
-#endif 
+#endif
