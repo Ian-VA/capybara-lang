@@ -20,7 +20,9 @@ enum astnodetype
 class astnode
 {
     public:
-        virtual astnodetype get_type();
+        virtual astnodetype get_type(){
+            return astnodetype::null;
+        }
     private:
         std::string value;
 
@@ -38,7 +40,7 @@ class integerliteral : public astnode
             this->value = tok.value;
         }
 
-        astnodetype get_type() {
+        virtual astnodetype get_type() {
             return astnodetype::integer;
         }
 
@@ -51,15 +53,20 @@ class binaryoperation : public astnode
 {
     private:
         std::string operation;
-        integerliteral* left;
-        integerliteral* right;
+        std::unique_ptr<integerliteral> left;
+        std::unique_ptr<integerliteral> right;
     public:
 
-        binaryoperation(std::string operations, integerliteral* lefts, integerliteral* rights)
+        virtual astnodetype get_type()
+        {
+            return astnodetype::variable;
+        }
+
+        binaryoperation(std::string operations, std::unique_ptr<integerliteral> rights, std::unique_ptr<integerliteral> lefts)
         {
             this->operation = operations;
-            this->left = lefts;
-            this->right = rights;
+            this->left = std::move(lefts);
+            this->right = std::move(rights);
         }
 
         std::string get_operation(){
@@ -73,7 +80,14 @@ class variabledeclaration : public astnode
         std::string variabletype, value, identifier;
     public:
 
-        astnodetype get_type(){
+        variabledeclaration(std::string variabletypes, std::string values, std::string identifiers)
+        {
+            this->identifier = identifiers;
+            this->variabletype = variabletypes;
+            this->value = values;
+        }
+
+        virtual astnodetype get_type(){
             return astnodetype::variable;
         }
 };
@@ -81,6 +95,7 @@ class variabledeclaration : public astnode
 struct parserclass
 {
     std::deque<Token> all_tokens;
+    int curr_line = 1;
     int index = 0;
 
     Token get_token()
@@ -103,12 +118,12 @@ struct parserclass
         all_tokens.pop_front();
     }
 
-    astnode* parseInteger();
-    astnode* parseVariable();
-    astnode* parseOperation();
-    astnode* parseIfStatement();
-    astnode* parseWhileLoop();
-    astnode* parseSwitchStatement();
+    std::unique_ptr<integerliteral> parseInteger();
+    std::unique_ptr<astnode> parseVariable();
+    std::unique_ptr<astnode> parseOperation();
+    std::unique_ptr<astnode> parseIfStatement();
+    std::unique_ptr<astnode> parseWhileLoop();
+    std::unique_ptr<astnode> parseSwitchStatement();
     
 
 
