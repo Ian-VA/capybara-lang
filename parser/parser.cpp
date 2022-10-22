@@ -2,66 +2,63 @@
 #include "lexer.hpp"
 #include <deque>
 // todo : a lot
-astnode* parserclass::parseInteger()
+std::unique_ptr<integerliteral> parserclass::parseInteger()
 {
-    if (get_token().type != type::INTEGER){
+    if (get_token().types != type::NUM){
         std::cout << "Expected integer, got " << get_token().value << "\n";
         return NULL;
     }
     
     eat();
     
-    return integerliteral {get_token()};
+    return std::make_unique<integerliteral>(get_token());
 }
 
-astnode* parserclass::parseVariable()
+std::unique_ptr<astnode> parserclass::parseVariable()
 {
-  if (get_token().type == type::VAR){
+  if (get_token().types == type::VAR){
       eat();
       
-      if (get_token().type != type::IDENTIFIER){
-          std::cout << "Expected identifier after VAR, got " << get_token().value << "\n";
-          return NULL;
+      if (get_token().types != type::IDENTIFIER){
+            std::cout << "Expected identifier after VAR, got " << get_token().value << "\n";
+            return NULL;
       } else {
-          std::string identifier = get_token().value;
+            std::string identifier = get_token().value;
+            eat();
+            eat();
+            std::string value = get_token().value;
+            eat();
+            return std::make_unique<variabledeclaration>(std::string("placeholder"), identifier, value);
       }
-      
-      eat();
-      std::string value = get_token().value;
-      
-      
-      
-      return variable {identifier, value};
-      
   }  
 }
 
-astnode* parserclass::parseOperation()
+std::unique_ptr<astnode> parserclass::parseOperation()
 {
-    if (get_token().type == type::INTEGER){
-        integerliteral *right = parseInteger();
+    if (get_token().types == type::NUM){
+        std::unique_ptr<integerliteral> right = std::move(parseInteger());
         
-        if (get_token().type != (type::PLUS || type::SUBTRACT || type::TIMES || type::DIVISION)){
+        if (get_token().types != (type::PLUS || type::SUBTRACT || type::TIMES || type::DIVISION)){
             std::cout << "Expected operation, got " << get_token().value << "\n";
             return NULL;
         } else {
             std::string operation = get_token().value;
             eat();
             
-            if (get_token().type != type::INTEGER){
+            if (get_token().types != type::NUM){
                 std::cout << "Expected integer after: " << operation << " got " << get_token().value << " instead" << "\n";
                 return NULL;
             } else {
-                integerliteral *left = parseInteger();
+                std::unique_ptr<integerliteral> left = std::move(parseInteger());
                 
-                return binaryoperation {operation, right, left};
+                return std::make_unique<binaryoperation>(operation, std::move(right), std::move(left));
             }
           
         }
     } 
 }
 
-astnode* parseIfStatement()
+std::unique_ptr<astnode> parseIfStatement()
 {
     
 }
@@ -70,7 +67,8 @@ astnode* parseIfStatement()
 int main()
 {
     parserclass parses;
-    std::deque<Token> alltokens = build_all();
+    std::string input = "var i = 3";
+    std::deque<Token> alltokens = build_all(input);
     parses.all_tokens = alltokens;
     parses.index = 0;
 
