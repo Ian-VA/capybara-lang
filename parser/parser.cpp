@@ -22,8 +22,7 @@ std::unique_ptr<variabledeclaration> parserclass::parseVariable()
             return NULL;
       } else {
             std::string identifier = get_token().value;
-            eat();
-            eat();
+            eat(); eat();
             std::string value = get_token().value;
             eat();
             return std::make_unique<variabledeclaration>(std::string("placeholder"), value, identifier);
