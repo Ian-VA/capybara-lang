@@ -1,7 +1,7 @@
 #include "parser.hpp"
 #include "lexer.hpp"
 #include <deque>
-// todo : type inference for variables, parse group expressions and other stuff, make cleaner error system
+// todo : type inference for variables, parse group expressions and other stuff, make cleaner error system, operator precedence
 std::unique_ptr<integerliteral> parserclass::parseInteger()
 {
     if (get_token().types != type::NUM){
