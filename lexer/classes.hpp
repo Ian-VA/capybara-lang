@@ -13,6 +13,7 @@ enum type
 {
     ASSIGN,
     COMPARE,
+    ARGSEPARATE,
     NUM,
     AND,
     PLUS,
@@ -50,31 +51,10 @@ enum type
     CONST
 };
 
-union S
-{
-    uint32_t* valueint = new uint32_t;
-    std::string value;
-    char valuechar;
-    double valuedouble;
-    
-    
-    ~S();
-    S();
-};
-
 struct Token
 {
     type types;
     std::string value;
-    S valuecontainer;
-    
-    
-    template <typename T>
-    Token(type types, T value){
-        this->types = types;
-        this->value = valuecontainer;
-    }
-
 
     friend std::ostream& operator<<(std::ostream& os, const Token& tk);
 };
@@ -110,6 +90,12 @@ class LEXER
     
 };
 
+class ERROR : public LEXER
+{
+    std::string location;
+    std::string type_of_error;
+};
+
 
 std::ostream& operator<<(std::ostream& os, const Token& tk)
 {
@@ -119,5 +105,4 @@ std::ostream& operator<<(std::ostream& os, const Token& tk)
 
 
 #endif
-
 
