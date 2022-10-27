@@ -24,7 +24,7 @@ enum astnodetype
 class astnode
 {
     public:
-        virtual astnodetype get_type(){
+        virtual astnodetype get_type() const {
             return astnodetype::null;
         }
 
@@ -40,18 +40,15 @@ class integerliteral : public astnode
 
     public:
 
-        integerliteral(Token tok)
-        {
-            this->value = tok.value;
-        }
+        integerliteral(Token tok) : value(tok.value) {}
 
-        virtual astnodetype get_type() {
+        virtual astnodetype get_type() const {
             return astnodetype::integer;
         }
 
         void accept(Visitor& visitor);
 
-        std::string get_value(){
+        std::string get_value() const {
             return value;
         }
 };
@@ -64,17 +61,12 @@ class binaryoperation : public astnode
         std::unique_ptr<astnode> right;
     public:
 
-        virtual astnodetype get_type()
+        virtual astnodetype get_type() const
         {
             return astnodetype::variable;
         }
 
-        binaryoperation(std::string operations, std::unique_ptr<astnode> rights, std::unique_ptr<astnode> lefts)
-        {
-            this->operation = operations;
-            this->left = std::move(lefts);
-            this->right = std::move(rights);
-        }
+        binaryoperation(const std::string operation, std::unique_ptr<astnode> right, std::unique_ptr<astnode> left) : operation(operation), right(std::move(right)), left(std::move(left)) {}
 
         void accept(Visitor& visitor);
 
@@ -90,37 +82,39 @@ class variabledeclaration : public astnode
         std::string variabletype, value, identifier;
     public:
 
-        variabledeclaration(std::string variabletypes, std::string values, std::string identifiers)
-        {
-            this->identifier = identifiers;
-            this->variabletype = variabletypes;
-            this->value = values;
-        }
-
+        variabledeclaration(const std::string variabletype, const std::string value, const std::string identifier) : variabletype(variabletype), value(value), identifier(identifier) {}
 
         void accept(Visitor& visitor);
 
 
-        std::string get_identifier()
+        std::string get_identifier() const
         {
             return identifier;
         }
 
-        std::string get_value()
+        std::string get_value() const
         {
             return value;
         }
 
 
-        std::string getvariabletype()
+        std::string getvariabletype() const
         {
             return std::string("placeholder");
         }
 
-        virtual astnodetype get_type(){
+        virtual astnodetype get_type() const {
             return astnodetype::variable;
         }
 
+};
+
+class callvariable : public astnode
+{
+    private:
+        std::string identifier;
+    public:
+        callvariable(const std::string &identifier) : identifier(identifier) {}
 };
 
 class callfunctionnode : public astnode 
@@ -132,6 +126,25 @@ class callfunctionnode : public astnode
         void accept(Visitor& visitor);
 
         callfunctionnode(const std::string &callee, std::vector<std::unique_ptr<astnode>> args) : callee(callee), args(std::move(args)) {}
+};
+
+class protonode 
+{
+    std::string name;
+    std::vector<std::string> args;
+
+    public:
+        protonode(const std::string& name, std::vector<std::string> args) : name(name), args(args) {}
+        const std::string &getName() const { return name; }
+};
+
+class funcdefinitionnode
+{
+    std::unique_ptr<protonode> proto;
+    std::unique_ptr<astnode> body;
+
+    public:
+        funcdefinitionnode(std::unique_ptr<protonode> proto, std::unique_ptr<astnode> body) : proto(std::move(proto)), body(std::move(body)) {}
 };
 
 struct parserclass
@@ -186,10 +199,10 @@ struct parserclass
     std::unique_ptr<astnode> parseFactor();
 
     std::unique_ptr<astnode> parseComparison();
-    std::unique_ptr<astnode> parseIfStatement();
-    std::unique_ptr<astnode> parseWhileLoop();
-    std::unique_ptr<astnode> parseSwitchStatement();
     std::unique_ptr<astnode> parseIdentifierCall();
+    std::unique_ptr<protonode> parsePrototype();
+    std::unique_ptr<funcdefinitionnode> parseDefinition();
+    std::unique_ptr<funcdefinitionnode> parseTopLevelExpr();
     std::unique_ptr<astnode> primaryParserLoop();
 
     std::unique_ptr<astnode> parseOperationRHS(int exprprec, std::unique_ptr<astnode> l) { // l here being a parsed binop
@@ -201,7 +214,7 @@ struct parserclass
                 return l;
             }
 
-            char binop = get_token();
+            std::string binop = get_token().value;
             eat();
 
             auto r = primaryParserLoop();
@@ -220,7 +233,7 @@ struct parserclass
                 }
             }
 
-            l = std::make_unique<binaryoperation> (binop, std::move(l), std::move(r));
+            l = std::make_unique<binaryoperation> (binop, std::move(r), std::move(l));
 
         }
     }
