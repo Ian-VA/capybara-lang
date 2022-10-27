@@ -7,6 +7,7 @@
 #include <string_view>
 #include "classes.hpp"
 #include "utilfunctions.hpp"
+#include <deque>
 #include <regex>
 #include <map>
 #include <array>
@@ -83,10 +84,8 @@ Token build_token(std::string_view input)
             lexer_obj.advance();
             digit.push_back(lexer_obj.current_char());
         }
-        
-        uint32_t* digit2 = new uint32_t;
-        digit2 = &(std::stoi(digit));
-        return Token {type::NUM, digit2};
+
+        return Token {type::NUM, digit};
 
     } else if (isalpha(lexer_obj.current_char())){
         std::string all_input;
@@ -99,8 +98,6 @@ Token build_token(std::string_view input)
         }
         return check_if_keyword(all_input);
     }
-    
-    // surprisingly, this method of switch statements for lexing has proven to be relatively fast and memory efficient
 
     switch(lexer_obj.current_char())
     {
@@ -195,12 +192,14 @@ Token build_token(std::string_view input)
         case ']':
             lexer_obj.advance();
             return Token {type::RSQBR, "]"};
+        case ',':
+            lexer_obj.advance();
+            return Token {type::ARGSEPARATE, ","};
         default:
             return unique_objects(lexer_obj.current_char(), lexer_obj.m_input, lexer_obj.m_index);
     }
 
 }
-
 
 std::string removeSpaces(std::string &str)
 {
@@ -241,14 +240,14 @@ std::string removeSpaces(std::string &str)
     return str;
 }
 
-std::vector<Token> build_all(std::string input)
+std::deque<Token> build_all(std::string input)
 {
     LEXER lexer_object;
     lexer_object.m_index = 0;
     input.push_back(' ');
     input = removeSpaces(input);
     lexer_object.m_input = input;
-    std::vector<Token> all_tokens;
+    std::deque<Token> all_tokens;
 
     while (true)
     {
@@ -277,5 +276,7 @@ std::vector<Token> build_all(std::string input)
     return all_tokens;
 
 }
+
+
 
 #endif
