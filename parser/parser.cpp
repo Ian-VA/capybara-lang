@@ -10,8 +10,8 @@ std::unique_ptr<astnode> parserclass::parseInteger()
     }
 
     auto result = std::make_unique<integerliteral>(get_token());
-    eat();
-    return std::move(result);
+    eat(); // eats integer
+    return std::move(result); 
 }
 
 
@@ -25,15 +25,15 @@ std::unique_ptr<astnode> parserclass::parseVariable()
             return nullptr;
       } else {
             std::string identifier = get_token().value;
-            eat(); eat();
+            eat(); eat(); // eats identifier and =
             std::string value = get_token().value;
-            eat();
-            return std::make_unique<variabledeclaration>(std::string("placeholder"), value, identifier);
+            eat(); 
+            return std::make_unique<variabledeclaration>(std::string("type"), value, identifier);
       }
   } else if (get_token().types == type::IDENTIFIER) { // we then assume this was called by parseidentifiercall, and is a call to a variable
   
       std::string identifier = get_token().value;
-      eat(); eat();
+      eat(); eat(); // eats 
 
       return std::make_unique<callvariable>(identifier);
   }
@@ -69,7 +69,7 @@ std::unique_ptr<astnode> parserclass::parseOperation()
 std::unique_ptr<astnode> parserclass::parseGroupedExpr()
 {
     eat(); // (
-    auto V = parseExpression();
+    auto V = parseExpression(); // parses anything in the parentheses
 
     if (!V || get_token().value != ")") {
         return nullptr;
@@ -81,17 +81,17 @@ std::unique_ptr<astnode> parserclass::parseGroupedExpr()
 
 std::unique_ptr<astnode> parserclass::parseIdentifierCall()
 {
-    if (peek_token().value != "(") {
+    if (peek_token().value != "(") { // assumes this is a variable
         return std::move(parseVariable());
     } 
 
     std::string identifiername = get_token().value;
-    eat(); eat();
+    eat(); eat(); // eats identifier, then (
     
     std::vector<std::unique_ptr<astnode>> args;
 
     while (get_token().value != ")") {
-        if (auto arg = parseExpression()){
+        if (auto arg = parseExpression()){ 
             args.push_back(std::move(arg)); // push back arg
 
             if (get_token().value != ",") {
@@ -117,14 +117,14 @@ std::unique_ptr<protonode> parserclass::parsePrototype()
         return nullptr;
     } else {
         std::string name = get_token().value;
-        eat();
+        eat(); // eat identifier
         if (get_token().value != "("){
             std::cout << "Expected '(' in function prototype" << "\n";
             return nullptr;
         } else {
-            eat();
+            eat(); // eat (
             std::vector<std::string> args;
-            while (get_token().types == type::IDENTIFIER)
+            while (get_token().types == type::IDENTIFIER) // until hit ) token
             {
                 args.push_back(get_token().value);
                 eat();
@@ -148,9 +148,9 @@ std::unique_ptr<protonode> parserclass::parsePrototype()
 std::unique_ptr<funcdefinitionnode> parserclass::parseDefinition()
 {
     eat();
-    auto proto = parsePrototype();
+    auto proto = parsePrototype(); // parses the protope i.e func(arg1, arg2)
 
-    if (auto e = parseExpression()) {
+    if (auto e = parseExpression()) { // parses full function body
         return std::make_unique<funcdefinitionnode>(std::move(proto), std::move(e));
     } else {
         return nullptr;
@@ -159,14 +159,14 @@ std::unique_ptr<funcdefinitionnode> parserclass::parseDefinition()
 
 std::unique_ptr<funcdefinitionnode> parserclass::parseTopLevelExpr()
 {
-    if (auto e = parseExpression()){
+    if (auto e = parseExpression()){ // allows user to type in arbitrary top level expressions
         auto proto = std::make_unique<protonode>("", std::vector<std::string>());
         return std::make_unique<funcdefinitionnode>(std::move(proto), std::move(e));
     }
 }
 
 
-std::unique_ptr<astnode> parserclass::primaryParserLoop()
+std::unique_ptr<astnode> parserclass::primaryParserLoop() // parses primary expressions, i.e identifiers, integers
 {
     switch (get_token().types)
     {
