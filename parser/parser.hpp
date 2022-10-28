@@ -70,7 +70,6 @@ class binaryoperation : public astnode
 
         void accept(Visitor& visitor);
 
-
         std::string get_operation(){
             return operation;
         }
@@ -86,7 +85,6 @@ class variabledeclaration : public astnode
 
         void accept(Visitor& visitor);
 
-
         std::string get_identifier() const
         {
             return identifier;
@@ -96,7 +94,6 @@ class variabledeclaration : public astnode
         {
             return value;
         }
-
 
         std::string getvariabletype() const
         {
@@ -217,7 +214,7 @@ struct parserclass
             std::string binop = get_token().value; // get operation
             eat();
 
-            auto r = primaryParserLoop(); // parse number 
+            auto r = primaryParserLoop(); // parse next number 
 
             if (!r) {
                 return nullptr;
@@ -233,7 +230,7 @@ struct parserclass
                 }
             }
 
-            l = std::make_unique<binaryoperation> (binop, std::move(r), std::move(l)); // combine r and l
+            l = std::make_unique<binaryoperation> (binop, std::move(r), std::move(l)); // combine r (number) and l (binop)
 
         }
     }
