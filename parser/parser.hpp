@@ -211,21 +211,21 @@ struct parserclass
             int tokprec = get_precedence(get_token());
 
             if (tokprec < exprprec) {
-                return l;
+                return l; // if curr precedence less than expr precedence, return l
             }
 
-            std::string binop = get_token().value;
+            std::string binop = get_token().value; // get operation
             eat();
 
-            auto r = primaryParserLoop();
+            auto r = primaryParserLoop(); // parse number 
 
             if (!r) {
                 return nullptr;
             }
 
-            int nextprec = get_precedence(get_token());
+            int nextprec = get_precedence(get_token()); // get precedence of next token
 
-            if (tokprec < nextprec) {
+            if (tokprec < nextprec) { // if curr precedence less than next precedence, recursion
                 r = parseOperationRHS(tokprec+1, std::move(r));
 
                 if (!r) {
@@ -233,7 +233,7 @@ struct parserclass
                 }
             }
 
-            l = std::make_unique<binaryoperation> (binop, std::move(r), std::move(l));
+            l = std::make_unique<binaryoperation> (binop, std::move(r), std::move(l)); // combine r and l
 
         }
     }
