@@ -3,6 +3,19 @@
 
 #include "classes.hpp"
 #include "utilfunctions.hpp"
+#include "llvm/ADT/APFloat.h"
+#include "llvm/ADT/STLExtras.h"
+#include "llvm/IR/BasicBlock.h"
+#include "llvm/IR/Constants.h"
+#include "llvm/IR/DerivedTypes.h"
+#include "llvm/IR/Function.h"
+#include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/Module.h"
+#include "llvm/IR/Type.h"
+#include "llvm/IR/Verifier.h"
+
+using namespace llvm;
 
 class Visitor;
 
@@ -28,6 +41,8 @@ class astnode
             return astnodetype::null;
         }
 
+        virtual Value accept(Visitor& visitor);
+
     private:
         std::string value;
 
@@ -39,14 +54,13 @@ class integerliteral : public astnode
         std::string value;
 
     public:
-
         integerliteral(Token tok) : value(tok.value) {}
 
-        virtual astnodetype get_type() const {
+        virtual astnodetype get_type() const override {
             return astnodetype::integer;
         }
 
-        void accept(Visitor& visitor);
+        Value accept(Visitor& visitor);
 
         std::string get_value() const {
             return value;
@@ -57,18 +71,18 @@ class binaryoperation : public astnode
 {
     private:
         std::string operation;
+    public:
         std::unique_ptr<astnode> left;
         std::unique_ptr<astnode> right;
-    public:
 
-        virtual astnodetype get_type() const
+        virtual astnodetype get_type() const override
         {
             return astnodetype::variable;
         }
 
         binaryoperation(const std::string operation, std::unique_ptr<astnode> right, std::unique_ptr<astnode> left) : operation(operation), right(std::move(right)), left(std::move(left)) {}
 
-        void accept(Visitor& visitor);
+        Value accept(Visitor& visitor);
 
         std::string get_operation(){
             return operation;
@@ -83,7 +97,7 @@ class variabledeclaration : public astnode
 
         variabledeclaration(const std::string variabletype, const std::string value, const std::string identifier) : variabletype(variabletype), value(value), identifier(identifier) {}
 
-        void accept(Visitor& visitor);
+        Value accept(Visitor& visitor);
 
         std::string get_identifier() const
         {
@@ -100,7 +114,7 @@ class variabledeclaration : public astnode
             return std::string("placeholder");
         }
 
-        virtual astnodetype get_type() const {
+        virtual astnodetype get_type() const override {
             return astnodetype::variable;
         }
 
@@ -111,6 +125,7 @@ class callvariable : public astnode
     private:
         std::string identifier;
     public:
+        Value accept(Visitor& visitor);
         callvariable(const std::string &identifier) : identifier(identifier) {}
 };
 
@@ -120,8 +135,7 @@ class callfunctionnode : public astnode
     std::vector<std::unique_ptr<astnode>> args;
 
     public:
-        void accept(Visitor& visitor);
-
+        Value accept(Visitor& visitor);
         callfunctionnode(const std::string &callee, std::vector<std::unique_ptr<astnode>> args) : callee(callee), args(std::move(args)) {}
 };
 
@@ -133,6 +147,7 @@ class protonode
     public:
         protonode(const std::string& name, std::vector<std::string> args) : name(name), args(args) {}
         const std::string &getName() const { return name; }
+        Value accept(Visitor& visitor);
 };
 
 class funcdefinitionnode
@@ -142,6 +157,20 @@ class funcdefinitionnode
 
     public:
         funcdefinitionnode(std::unique_ptr<protonode> proto, std::unique_ptr<astnode> body) : proto(std::move(proto)), body(std::move(body)) {}
+        Value accept(Visitor& visitor);
+};
+
+class error
+{
+    public:
+        error(int m_line, std::string error, std::string note){
+            std::cout << "Error encountered at line " << m_line << ": " << error << "\n";
+            if (!note.empty()){
+                std::cout << "Note: " << note << "\n";
+            }
+            std::cout << "Aborting.." << "\n";
+            exit(1);
+        }
 };
 
 struct parserclass
@@ -208,21 +237,21 @@ struct parserclass
             int tokprec = get_precedence(get_token());
 
             if (tokprec < exprprec) {
-                return l; // if curr precedence less than expr precedence, return l
+                return l;
             }
 
-            std::string binop = get_token().value; // get operation
+            std::string binop = get_token().value;
             eat();
 
-            auto r = primaryParserLoop(); // parse next number 
+            auto r = primaryParserLoop();
 
             if (!r) {
                 return nullptr;
             }
 
-            int nextprec = get_precedence(get_token()); // get precedence of next token
+            int nextprec = get_precedence(get_token());
 
-            if (tokprec < nextprec) { // if curr precedence less than next precedence, recursion
+            if (tokprec < nextprec) {
                 r = parseOperationRHS(tokprec+1, std::move(r));
 
                 if (!r) {
@@ -230,12 +259,16 @@ struct parserclass
                 }
             }
 
-            l = std::make_unique<binaryoperation> (binop, std::move(r), std::move(l)); // combine r (number) and l (binop)
+            l = std::make_unique<binaryoperation> (binop, std::move(r), std::move(l));
 
         }
     }
 
     std::unique_ptr<astnode> parseExpression() {
+        if (get_token().value == "EOF") {
+            return nullptr;
+        }
+
         auto l = primaryParserLoop();
         if (!l) {
             return nullptr;
