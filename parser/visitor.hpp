@@ -21,18 +21,17 @@ class Visitor
     public:
         int m_line;
         static LLVMContext llvmcontext;
-        static IRBuilder<> builder(LLVMContext);
+        const std::unique_ptr<IRBuilder<>> builder = std::make_unique<IRBuilder<>>(llvmcontext);
         static std::unique_ptr<Module> llvmmodule;
         static std::map<std::string, Value*> namedvalues;
-
         
-        virtual Value visit (const std::unique_ptr<integerliteral> node);
-        virtual Value visit (const std::unique_ptr<binaryoperation> node);
-        virtual Value visit (const std::unique_ptr<variabledeclaration> node);
-        virtual Value visit (const std::unique_ptr<callvariable> node);
-        virtual Value visit (const std::unique_ptr<callfunctionnode> node);
-        virtual Value visit (const std::unique_ptr<protonode> node);
-        virtual Value visit (const std::unique_ptr<funcdefinitionnode> node);
+        virtual Value* visit (const std::unique_ptr<integerliteral> node);
+        virtual Value* visit (const std::unique_ptr<binaryoperation> node);
+        virtual Value* visit (const std::unique_ptr<variabledeclaration> node);
+        virtual Value* visit (const std::unique_ptr<callvariable> node);
+        virtual Value* visit (const std::unique_ptr<callfunctionnode> node);
+        virtual Value* visit (const std::unique_ptr<protonode> node);
+        virtual Value* visit (const std::unique_ptr<funcdefinitionnode> node);
 
 
 };
