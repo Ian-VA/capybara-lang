@@ -25,8 +25,8 @@ Value Visitor::visit(const std::unique_ptr<variabledeclaration> node){
 }
 
 Value Visitor::visit(const std::unique_ptr<binaryoperation> node) {
-    Value *L = node->left->accept();
-    Value *R = node->right->accept();
+    Value *L = node->left->accept(*this);
+    Value *R = node->right->accept(*this);
 
     switch (node->get_operation())
     {
@@ -43,7 +43,6 @@ Value Visitor::visit(const std::unique_ptr<binaryoperation> node) {
             codegenerror {m_line, "Invalid binary operator", "This probably happened because I haven't added all the common operators to this compiler yet"};
     }
 }
-
 
 int main()
 {
