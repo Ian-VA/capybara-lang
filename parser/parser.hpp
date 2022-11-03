@@ -17,8 +17,6 @@
 
 using namespace llvm;
 
-class Visitor;
-
 enum astnodetype
 {
     operation,
@@ -37,11 +35,16 @@ enum astnodetype
 class astnode
 {
     public:
+
+        const std::string get_value() const {
+            return value;
+        }
+
         virtual astnodetype get_type() const {
             return astnodetype::null;
         }
 
-        virtual Value accept(Visitor& visitor);
+        virtual Value* codegen();
 
     private:
         std::string value;
@@ -55,12 +58,13 @@ class integerliteral : public astnode
 
     public:
         integerliteral(Token tok) : value(tok.value) {}
+        integerliteral(std::string val) : value(val) {}
+
+        virtual Value* codegen();
 
         virtual astnodetype get_type() const override {
             return astnodetype::integer;
         }
-
-        Value accept(Visitor& visitor);
 
         std::string get_value() const {
             return value;
@@ -72,20 +76,20 @@ class binaryoperation : public astnode
     private:
         std::string operation;
     public:
+        virtual Value* codegen();
+
         std::unique_ptr<astnode> left;
         std::unique_ptr<astnode> right;
 
         virtual astnodetype get_type() const override
         {
-            return astnodetype::variable;
+            return astnodetype::operation;
         }
 
         binaryoperation(const std::string operation, std::unique_ptr<astnode> right, std::unique_ptr<astnode> left) : operation(operation), right(std::move(right)), left(std::move(left)) {}
 
-        Value accept(Visitor& visitor);
-
-        std::string get_operation(){
-            return operation;
+        char get_operation(){
+            return operation[0]; // bandaid for switch statements.. will fix when it becomes a problem with operators like += 
         }
 };
 
@@ -94,10 +98,9 @@ class variabledeclaration : public astnode
     private:
         std::string variabletype, value, identifier;
     public:
+        virtual Value* codegen();
 
         variabledeclaration(const std::string variabletype, const std::string value, const std::string identifier) : variabletype(variabletype), value(value), identifier(identifier) {}
-
-        Value accept(Visitor& visitor);
 
         std::string get_identifier() const
         {
@@ -125,7 +128,11 @@ class callvariable : public astnode
     private:
         std::string identifier;
     public:
-        Value accept(Visitor& visitor);
+        const std::string get_identifier() const {
+            return identifier;
+        }
+
+        virtual Value* codegen();
         callvariable(const std::string &identifier) : identifier(identifier) {}
 };
 
@@ -135,7 +142,7 @@ class callfunctionnode : public astnode
     std::vector<std::unique_ptr<astnode>> args;
 
     public:
-        Value accept(Visitor& visitor);
+        virtual Value* codegen();
         callfunctionnode(const std::string &callee, std::vector<std::unique_ptr<astnode>> args) : callee(callee), args(std::move(args)) {}
 };
 
@@ -145,9 +152,9 @@ class protonode
     std::vector<std::string> args;
 
     public:
+        virtual Value* codegen();
         protonode(const std::string& name, std::vector<std::string> args) : name(name), args(args) {}
         const std::string &getName() const { return name; }
-        Value accept(Visitor& visitor);
 };
 
 class funcdefinitionnode
@@ -156,8 +163,8 @@ class funcdefinitionnode
     std::unique_ptr<astnode> body;
 
     public:
+        Value* codegen();
         funcdefinitionnode(std::unique_ptr<protonode> proto, std::unique_ptr<astnode> body) : proto(std::move(proto)), body(std::move(body)) {}
-        Value accept(Visitor& visitor);
 };
 
 class error
