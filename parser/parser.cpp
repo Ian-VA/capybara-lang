@@ -2,6 +2,8 @@
 #include "lexer.hpp"
 #include <deque>
 
+//todo: type inference, strings and other types
+
 std::unique_ptr<astnode> parserclass::parseInteger()
 {
     if (get_token().types != type::NUM){
