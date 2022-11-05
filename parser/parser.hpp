@@ -3,6 +3,7 @@
 
 #include "classes.hpp"
 #include "utilfunctions.hpp"
+#include <deque>
 #include "llvm/ADT/APFloat.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/IR/BasicBlock.h"
@@ -16,6 +17,26 @@
 #include "llvm/IR/Verifier.h"
 
 using namespace llvm;
+
+
+static std::unique_ptr<LLVMContext> llvmcontext; // yes global variables bad
+static std::unique_ptr<Module> llvmodule;
+static std::unique_ptr<IRBuilder<>> builder;
+static std::map<std::string, Value*> namedvalues;
+int m_line = 0;
+
+class codegenerror
+{
+    public:
+        codegenerror(int m_line, std::string error, std::string note){
+            std::cout << "Error encountered at line " << m_line << ": " << error << "\n";
+            if (!note.empty()){
+                std::cout << "Note: " << note << "\n";
+            }
+            std::cout << "Aborting.." << "\n";
+            exit(1);
+        }
+};
 
 enum astnodetype
 {
@@ -36,7 +57,7 @@ class astnode
 {
     public:
 
-        const std::string get_value() const {
+        virtual std::string get_value() const {
             return value;
         }
 
@@ -44,7 +65,7 @@ class astnode
             return astnodetype::null;
         }
 
-        virtual Value* codegen();
+        virtual llvm::Value* codegen();
 
     private:
         std::string value;
@@ -60,13 +81,15 @@ class integerliteral : public astnode
         integerliteral(Token tok) : value(tok.value) {}
         integerliteral(std::string val) : value(val) {}
 
-        virtual Value* codegen();
+        virtual llvm::Value* codegen() override {
+            return ConstantFP::get(*llvmcontext, APFloat(std::stof(std::move(this->get_value()))));
+        }
 
         virtual astnodetype get_type() const override {
             return astnodetype::integer;
         }
 
-        std::string get_value() const {
+        virtual std::string get_value() const override{
             return value;
         }
 };
@@ -76,7 +99,25 @@ class binaryoperation : public astnode
     private:
         std::string operation;
     public:
-        virtual Value* codegen();
+        virtual llvm::Value* codegen() override{
+            Value *L = this->left->codegen();
+            Value *R = this->right->codegen();
+
+            switch (this->get_operation())
+            {
+                case '+':
+                    return builder->CreateFAdd(L, R, "addtmp");
+                case '-':
+                    return builder->CreateFSub(L, R, "subtmp");
+                case '*':
+                    return builder->CreateFMul(L, R, "multmp");
+                case '<':
+                    L = builder->CreateFCmpULT(L, R, "cmptmp");
+                    return builder->CreateUIToFP(L, Type::getDoubleTy(*llvmcontext), "booltmp");
+                default:
+                    codegenerror {m_line, "Invalid binary operator", "This probably happened because I haven't added all the common operators to this compiler yet"};
+            }
+        }
 
         std::unique_ptr<astnode> left;
         std::unique_ptr<astnode> right;
@@ -98,7 +139,6 @@ class variabledeclaration : public astnode
     private:
         std::string variabletype, value, identifier;
     public:
-        virtual Value* codegen();
 
         variabledeclaration(const std::string variabletype, const std::string value, const std::string identifier) : variabletype(variabletype), value(value), identifier(identifier) {}
 
@@ -107,7 +147,7 @@ class variabledeclaration : public astnode
             return identifier;
         }
 
-        std::string get_value() const
+        virtual std::string get_value() const 
         {
             return value;
         }
@@ -132,7 +172,15 @@ class callvariable : public astnode
             return identifier;
         }
 
-        virtual Value* codegen();
+        virtual llvm::Value* codegen() override {
+            Value* V = namedvalues[this->get_identifier()];
+    
+            if (!V) {
+                codegenerror {m_line, "Unknown variable referenced", ""};
+            } else {
+                return V;
+            }
+        }
         callvariable(const std::string &identifier) : identifier(identifier) {}
 };
 
@@ -142,7 +190,6 @@ class callfunctionnode : public astnode
     std::vector<std::unique_ptr<astnode>> args;
 
     public:
-        virtual Value* codegen();
         callfunctionnode(const std::string &callee, std::vector<std::unique_ptr<astnode>> args) : callee(callee), args(std::move(args)) {}
 };
 
@@ -152,7 +199,6 @@ class protonode
     std::vector<std::string> args;
 
     public:
-        virtual Value* codegen();
         protonode(const std::string& name, std::vector<std::string> args) : name(name), args(args) {}
         const std::string &getName() const { return name; }
 };
@@ -163,7 +209,6 @@ class funcdefinitionnode
     std::unique_ptr<astnode> body;
 
     public:
-        Value* codegen();
         funcdefinitionnode(std::unique_ptr<protonode> proto, std::unique_ptr<astnode> body) : proto(std::move(proto)), body(std::move(body)) {}
 };
 
