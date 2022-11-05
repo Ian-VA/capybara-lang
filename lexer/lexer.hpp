@@ -1,6 +1,3 @@
-#ifndef LEXER_HPP
-#define LEXER_HPP
-
 #include <vector>
 #include <iostream>
 #include <string>
@@ -39,8 +36,8 @@ Token check_if_keyword(std::string input)
     std::map<std::string, type> mapStringtoType = {
         {"true", type::TRUE},
         {"false", type::FALSE},
-        {"var", type::VAR},
-        {"func", type::FUNC},
+        {"local", type::VAR},
+        {"fn", type::FUNC},
         {"const", type::CONST},
         {"if", type::IF},
         {"elseif", type::ELSEIF},
@@ -78,6 +75,7 @@ Token build_token(std::string_view input)
     } else if (isdigit){
         std::string digit;
         digit.push_back(lexer_obj.current_char());
+        std::cout << lexer_obj.peek() << "\n";
         
         while (std::isdigit(lexer_obj.peek()))
         {
@@ -88,8 +86,8 @@ Token build_token(std::string_view input)
         return Token {type::NUM, digit};
 
     } else if (isalpha(lexer_obj.current_char())){
-        std::string all_input;
-        all_input.push_back(lexer_obj.current_char());
+        std::string all_input; // local
+        all_input.push_back(lexer_obj.current_char()); // l 
         
         while (isalpha(lexer_obj.peek()) || std::isdigit(lexer_obj.peek()))
         {
@@ -248,6 +246,9 @@ std::deque<Token> build_all(std::string input)
     input = removeSpaces(input);
     lexer_object.m_input = input;
     std::deque<Token> all_tokens;
+    std::cout << "INPUT: " << input << "\n"; // if this line isnt added, the entire lexer breaks. I have no idea why. 
+    // its like schrodingers string, if you dont look at it in the console, it breaks. i dont know why it works. it just does.
+    // im not spending another month debugging this system so this is now a permanent feature. i am so sorry
 
     while (true)
     {
@@ -268,8 +269,6 @@ std::deque<Token> build_all(std::string input)
             break;
         }
 
-        lexer_object.advance();
-
     }
 
 
@@ -277,6 +276,17 @@ std::deque<Token> build_all(std::string input)
 
 }
 
+int main()
+{
+    std::string input = "fn def(x1, x2) x1 + x2";
+
+    std::deque<Token> vec = build_all(input);
+
+    for (auto i : vec){
+        std::cout << i;
+    }
+
+}
 
 
-#endif
+
