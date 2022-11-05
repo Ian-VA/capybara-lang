@@ -246,9 +246,7 @@ std::deque<Token> build_all(std::string input)
     input = removeSpaces(input);
     lexer_object.m_input = input;
     std::deque<Token> all_tokens;
-    std::cout << "INPUT: " << input << "\n"; // if this line isnt added, the entire lexer breaks. I have no idea why. 
-    // its like schrodingers string, if you dont look at it in the console, it breaks. i dont know why it works. it just does.
-    // im not spending another month debugging this system so this is now a permanent feature. i am so sorry
+    std::cout << "INPUT: " << input << "\n"; 
 
     while (true)
     {
