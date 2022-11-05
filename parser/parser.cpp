@@ -2,7 +2,6 @@
 #include "lexer.hpp"
 #include <deque>
 
-//todo: type inference, strings and other types
 
 std::unique_ptr<astnode> parserclass::parseInteger()
 {
@@ -32,13 +31,14 @@ std::unique_ptr<astnode> parserclass::parseVariable()
             if (value == "EOF") {
                 error {curr_line, "Expected value, found EOF", ""};
             }
+            
             eat();
             return std::make_unique<variabledeclaration>(std::string("placeholder"), value, identifier);
       }
   } else if (get_token().types == type::IDENTIFIER) { // we then assume this was called by parseidentifiercall, and is a call to a variable
       std::string identifier = get_token().value;
       eat(); eat();
-
+    
       return std::make_unique<callvariable>(identifier);
   }
 
@@ -207,6 +207,8 @@ int main()
                 parses.parseVariable();
                 std::cout << "parsed variable" << "\n";
                 break;
+            case type::ENDINPUT:
+                error {1, "End of input", ""};
         }
     }
 
