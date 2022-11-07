@@ -1,12 +1,14 @@
-#include "parser.hpp"
 #include <cctype>
+#include <vector>
+#include <string>
+#include "parser.hpp"
+#include "lexer.hpp"
+#include <fstream>
+#include "parserdefinitions.hpp"
 
-static std::unique_ptr<LLVMContext> llvmcontext; // yes global variables bad
-static std::unique_ptr<Module> llvmodule;
-static std::unique_ptr<IRBuilder<>> builder;
-static std::map<std::string, Value*> namedvalues;
+std::ofstream ostream;
+static std::vector<std::string> namedvalues; // yes, global variables are bad
 int m_line = 0;
-
 
 class codegenerror
 {
@@ -21,56 +23,52 @@ class codegenerror
         }
 };
 
-
-
-Value* astnode::codegen()
-{
-    if (isNumber(this->get_value())) {
-        integerliteral integer(this->get_value());
-        return integer.codegen();
-    } else {
-        callvariable var(this->get_value());
-        return var.codegen();
-    }
+void write(std::string input) {
+    ostream.open("cap.c");
+    ostream << input;
+    ostream.close();
 }
 
-
-Value* integerliteral::codegen(){
-    return ConstantFP::get(*llvmcontext, APFloat(std::stof(std::move(this->get_value()))));
+void startCodegen() {
+    write("int main()\n{\nreturn0\n}");
 }
 
-Value* callvariable::codegen(){
-    Value* V = namedvalues[this->get_identifier()];
-    
-    if (!V) {
+void integerliteral::codegen() {
+    write(this->get_value());
+}
+
+void callvariable::codegen() {
+    if (std::find(namedvalues.begin(), namedvalues.end(), this->get_identifier()) != namedvalues.end()) {
         codegenerror {m_line, "Unknown variable referenced", ""};
     } else {
-        return V;
+        write(this->get_identifier());
     }
 }
 
-Value* binaryoperation::codegen() {
-    Value *L = this->left->codegen();
-    Value *R = this->right->codegen();
-
-    switch (this->get_operation())
-    {
-        case '+':
-            return builder->CreateFAdd(L, R, "addtmp");
-        case '-':
-            return builder->CreateFSub(L, R, "subtmp");
-        case '*':
-            return builder->CreateFMul(L, R, "multmp");
-        case '<':
-            L = builder->CreateFCmpULT(L, R, "cmptmp");
-            return builder->CreateUIToFP(L, Type::getDoubleTy(*llvmcontext), "booltmp");
-        default:
-            codegenerror {m_line, "Invalid binary operator", "This probably happened because I haven't added all the common operators to this compiler yet"};
+void astnode::codegen() {
+    if (isNumber(this->get_value())) {
+        integerliteral integer(this->get_value());
+        integer.codegen();
+    } else {
+        callvariable var(this->get_value());
+        var.codegen();
     }
+}
+
+void binaryoperation::codegen() {
+    this->left->codegen(); write(this->operation); this->right->codegen(); write(";");
 }
 
 
 int main()
 {
+    parserclass parses;
+    std::string input;
+    getline(std::cin, input);
+    std::deque<Token> alltokens = build_all(input);
+    parses.all_tokens = alltokens;
+    parses.index = 0;
+    std::unique_ptr<astnode> bin = std::move(parses.parseInteger());
 
+    bin->codegen();
 }
