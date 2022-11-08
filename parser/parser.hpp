@@ -135,6 +135,11 @@ class callfunctionnode : public astnode
 
     public:
         void codegen() {}
+        
+        const std::vector<std::unique_ptr<astnode>> get_args() const {
+            return std::move(args);
+        }
+        
         callfunctionnode(const std::string &callee, std::vector<std::unique_ptr<astnode>> args) : callee(callee), args(std::move(args)) {}
 };
 
@@ -147,6 +152,7 @@ class protonode
         void codegen();
         protonode(const std::string& name, std::vector<std::string> args) : name(name), args(args) {}
         const std::string &getName() const { return name; }
+        const std::vector<std::string> getArgs() const { return args; }
 };
 
 class funcdefinitionnode
