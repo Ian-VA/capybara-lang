@@ -4,19 +4,7 @@
 #include "test.hpp"
 
 
-int evaluate(BinaryOperationNode curr){
-    switch (curr.operation.types)
-    {
-        case type::PLUS:
-            return std::stoi(curr.left.value) + std::stoi(curr.right.value);
-        case type::TIMES:
-            return std::stoi(curr.left.value) * std::stoi(curr.right.value);
-        case type::SUBTRACT:
-            return std::stoi(curr.left.value) - std::stoi(curr.right.value);
-        case type::DIVISION:
-            return std::stoi(curr.left.value) / std::stoi(curr.right.value);
-    }
-}
+
 std::string readln(std::string input)
 {
     return input;
