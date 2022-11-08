@@ -45,6 +45,18 @@ void integerliteral::codegen() {
     write(this->get_value(), false);
 }
 
+void callfunctionnode::codegen(){
+    write(this->callee() + "(", false);
+    
+    for (auto i : this->args) {
+        write(i->codegen() +",", false);
+        
+        if (i == this->args[args.size() - 2]) {
+            write(i->codegen() + ")", false);
+        }
+    } 
+}
+
 void variabledeclaration::codegen() {
 
     if(this->getvariabletype() == "string"){
@@ -55,6 +67,18 @@ void variabledeclaration::codegen() {
         write(this->getvariabletype() + " " + this->get_identifier() + "=" + this->get_value(), true);
     }
 
+}
+
+void protonode::codegen(){
+    write(this->getName() + "(", false);
+    
+    for (auto i : this->getArgs()) {
+        write(i->codegen() +",", false);
+        
+        if (i == this->getArgs()[getArgs().size() - 2]) {
+            write(i->codegen() + ")", true);
+        }
+    }
 }
 
 void callvariable::codegen() {
