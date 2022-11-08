@@ -171,7 +171,13 @@ Token build_token(std::string_view input)
             }
         case '/':
             lexer_obj.advance();
-            return Token {type::DIVISION, "/"};
+            switch(lexer_obj.current_char())
+            {
+                case '/':
+                    return Token {type::COMMENT, "//"};
+                default:
+                    return Token {type::DIVISION, "/"};
+            }
         case '(':
             lexer_obj.advance();
             return Token {type::LPAREN, "("};
