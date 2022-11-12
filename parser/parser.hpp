@@ -12,7 +12,7 @@ enum astnodetype
     integer,
     stringliteral,
     variable,
-    ifstatement,
+    ifs,
     boolean,
     null,
     groupedexpr,
@@ -33,7 +33,8 @@ class astnode
             return astnodetype::null;
         }
 
-        virtual void codegen();
+        virtual const std::string& codegen();
+        bool isReturnExpression = false;
 
     private:
         std::string value;
@@ -57,7 +58,7 @@ class integerliteral : public astnode
             return value;
         }
 
-        virtual void codegen();
+        const virtual std::string& codegen();
 
 };
 
@@ -66,21 +67,25 @@ class binaryoperation : public astnode
     private:
         std::string operation;
     public:
-        std::unique_ptr<astnode> left;
-        std::unique_ptr<astnode> right;
+        std::shared_ptr<astnode> left;
+        std::shared_ptr<astnode> right;
+
+        virtual std::string get_value() const override {
+            return left->get_value() + operation + right->get_value();
+        }
 
         virtual astnodetype get_type() const override
         {
             return astnodetype::operation;
         }
 
-        binaryoperation(const std::string operation, std::unique_ptr<astnode> right, std::unique_ptr<astnode> left) : operation(operation), right(std::move(right)), left(std::move(left)) {}
+        binaryoperation(const std::string operation, std::shared_ptr<astnode> right, std::shared_ptr<astnode> left) : operation(operation), right((right)), left((left)) {}
 
         char get_operation(){
             return operation[0]; // bandaid for switch statements.. will fix when it becomes a problem with operators like += 
         }
         
-        virtual void codegen();
+        const virtual std::string& codegen();
 
 };
 
@@ -104,43 +109,48 @@ class variabledeclaration : public astnode
 
         std::string getvariabletype() const
         {
-            return std::string("placeholder");
+            if (isNumber(this->get_value())){
+                return std::string("int");
+
+            } else if (std::isalpha(this->get_value()[0])) {
+                if (this->get_value().size() <= 1) {
+                    return std::string("char");
+                }
+                return std::string("string");
+
+            }
         }
 
         virtual astnodetype get_type() const override {
             return astnodetype::variable;
         }
 
-        void codegen() {}
+        const virtual std::string& codegen();
 
 };
 
 class callvariable : public astnode
 {
     private:
-        std::string identifier;
+        std::string value;
     public:
-        const std::string get_identifier() const {
-            return identifier;
+        virtual std::string get_value() const override {
+            return value;
         }
-        virtual void codegen();
-
-        callvariable(const std::string &identifier) : identifier(identifier) {}
+        const virtual std::string& codegen();
+    
+        callvariable(const std::string &identifier) : value(identifier) {}
 };
 
 class callfunctionnode : public astnode 
 {
     std::string callee;
-    std::vector<std::unique_ptr<astnode>> args;
+    std::vector<std::shared_ptr<astnode>> args;
 
     public:
-        void codegen() {}
-        
-        const std::vector<std::unique_ptr<astnode>> get_args() const {
-            return std::move(args);
-        }
-        
-        callfunctionnode(const std::string &callee, std::vector<std::unique_ptr<astnode>> args) : callee(callee), args(std::move(args)) {}
+        const std::string& codegen();
+        callfunctionnode(const std::string &callee, std::vector<std::shared_ptr<astnode>> args) : callee(callee), args((args)) {}
+        const std::vector<std::shared_ptr<astnode>> &getArgs() const {return (args);}
 };
 
 class protonode 
@@ -149,21 +159,36 @@ class protonode
     std::vector<std::string> args;
 
     public:
-        void codegen();
+        const std::string& codegen();
         protonode(const std::string& name, std::vector<std::string> args) : name(name), args(args) {}
         const std::string &getName() const { return name; }
-        const std::vector<std::string> getArgs() const { return args; }
+        const std::vector<std::string> &getArgs() const {return args;}
 };
 
 class funcdefinitionnode
 {
-    std::unique_ptr<protonode> proto;
-    std::unique_ptr<astnode> body;
+    std::shared_ptr<protonode> proto;
+    std::shared_ptr<astnode> body;
     std::string returntype;
 
     public:
-        void codegen();
-        funcdefinitionnode(std::unique_ptr<protonode> proto, std::unique_ptr<astnode> body) : proto(std::move(proto)), body(std::move(body)) {}
+        const std::string& getBody() {return body->get_value();}
+        const std::string& codegen();
+        const std::string& getReturnType() const {return returntype;}
+        funcdefinitionnode(std::shared_ptr<protonode> proto, std::shared_ptr<astnode> body) : proto((proto)), body((body)) {}
+};
+
+class ifstatement
+{
+    std::shared_ptr<astnode> condition;
+    std::shared_ptr<astnode> body;
+
+    public:
+        std::shared_ptr<astnode> get_condition() {
+            return (condition);
+        }
+
+        ifstatement(std::shared_ptr<astnode> condition, std::shared_ptr<astnode> body) : condition((condition)), body((body)) {}
 };
 
 class error
@@ -183,6 +208,7 @@ struct parserclass
 {
     std::deque<Token> all_tokens;
     int curr_line = 1;
+    bool encountered_main = false;
     int index = 0;
 
     std::map<std::string, int> precedence = {
@@ -222,22 +248,22 @@ struct parserclass
         all_tokens.pop_front();
     }
 
-    std::unique_ptr<astnode> parseStatement();
-    std::unique_ptr<astnode> parseGroupedExpr();
+    std::shared_ptr<astnode> parseStatement();
+    std::shared_ptr<astnode> parseGroupedExpr();
 
-    std::unique_ptr<astnode> parseInteger();
-    std::unique_ptr<astnode> parseVariable();
-    std::unique_ptr<binaryoperation> parseOperation();
-    std::unique_ptr<astnode> parseFactor();
-
-    std::unique_ptr<astnode> parseComparison();
-    std::unique_ptr<astnode> parseIdentifierCall();
-    std::unique_ptr<protonode> parsePrototype();
-    std::unique_ptr<funcdefinitionnode> parseDefinition();
-    std::unique_ptr<funcdefinitionnode> parseTopLevelExpr();
-    std::unique_ptr<astnode> primaryParserLoop();
-
-    std::unique_ptr<astnode> parseOperationRHS(int exprprec, std::unique_ptr<astnode> l) { // l here being a parsed binop
+    std::shared_ptr<integerliteral> parseInteger();
+    std::shared_ptr<variabledeclaration> parseVariable();
+    std::shared_ptr<binaryoperation> parseOperation();
+    std::shared_ptr<callvariable> parseCallVariable();
+    std::shared_ptr<astnode> parseComparison();
+    std::shared_ptr<ifstatement> parseIfStatement();
+    std::shared_ptr<callfunctionnode> parseIdentifierCall();
+    std::shared_ptr<protonode> parsePrototype();
+    std::shared_ptr<funcdefinitionnode> parseDefinition();
+    std::shared_ptr<funcdefinitionnode> parseTopLevelExpr();
+    std::shared_ptr<astnode> primaryParserLoop();
+    
+    std::shared_ptr<astnode> parseOperationRHS(int exprprec, std::shared_ptr<astnode> l) { // l here being a parsed identifier or number (anything else is returned automatically)
         while (true)
         {
             int tokprec = get_precedence(get_token());
@@ -258,19 +284,19 @@ struct parserclass
             int nextprec = get_precedence(get_token());
 
             if (tokprec < nextprec) {
-                r = parseOperationRHS(tokprec+1, std::move(r));
+                r = parseOperationRHS(tokprec+1, (r));
 
                 if (!r) {
                     return nullptr;
                 }
             }
 
-            l = std::make_unique<binaryoperation> (binop, std::move(r), std::move(l));
+            l = std::make_shared<binaryoperation> (binop, (r), (l));
 
         }
     }
 
-    std::unique_ptr<astnode> parseExpression() {
+    std::shared_ptr<astnode> parseExpression() {
         if (get_token().value == "EOF") {
             return nullptr;
         }
@@ -279,13 +305,13 @@ struct parserclass
         if (!l) {
             return nullptr;
         } else {
-            return parseOperationRHS(0, std::move(l));
+            return parseOperationRHS(0, (l));
         }
     }
 
 };
 
-std::ostream& operator<<(std::ostream& os, const std::unique_ptr<variabledeclaration> variable)
+std::ostream& operator<<(std::ostream& os, const std::shared_ptr<variabledeclaration> variable)
 {
     os << "REPRESENT VARIABLE" << "\n" << "TYPE: " << variable->getvariabletype() << "\n" << "IDENTIFIER: " << variable->get_identifier() << "\n" << "VALUE: " << variable->get_value() << "\n";
     return os;
