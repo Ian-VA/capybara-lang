@@ -1,3 +1,7 @@
+#ifndef LEXER_HPP
+#define LEXER_HPP
+
+
 #include <vector>
 #include <iostream>
 #include <string>
@@ -8,6 +12,20 @@
 #include <regex>
 #include <map>
 #include <array>
+
+std::map<std::string, type> mapStringtoType = {
+    {"true", type::TRUE},
+    {"false", type::FALSE},
+    {"local", type::VAR},
+    {"fn", type::FUNC},
+    {"const", type::CONST},
+    {"if", type::IF},
+    {"elseif", type::ELSEIF},
+    {"else", type::ELSE},
+    {"return", type::RETURN},
+    {"end", type::END},
+    {"main", type::MAIN}
+};
 
 
 Token unique_objects(char current_char, std::string_view input, int index)
@@ -33,18 +51,6 @@ Token unique_objects(char current_char, std::string_view input, int index)
 
 Token check_if_keyword(std::string input)
 {
-    std::map<std::string, type> mapStringtoType = {
-        {"true", type::TRUE},
-        {"false", type::FALSE},
-        {"local", type::VAR},
-        {"fn", type::FUNC},
-        {"const", type::CONST},
-        {"if", type::IF},
-        {"elseif", type::ELSEIF},
-        {"else", type::ELSE},
-        {"return", type::RETURN}
-    };
-
     type Type = mapStringtoType[input];
     switch(Type)
     {
@@ -54,6 +60,9 @@ Token check_if_keyword(std::string input)
         case type::FUNC:
         case type::CONST:
         case type::IF:
+        case type::MAIN:
+        case type::RETURN:
+        case type::END:
         case type::ELSEIF:
         case type::ELSE:
             return Token {Type, input};
@@ -75,8 +84,6 @@ Token build_token(std::string_view input)
     } else if (isdigit){
         std::string digit;
         digit.push_back(lexer_obj.current_char());
-        std::cout << lexer_obj.peek() << "\n";
-        
         while (std::isdigit(lexer_obj.peek()))
         {
             lexer_obj.advance();
@@ -93,8 +100,15 @@ Token build_token(std::string_view input)
         {
             lexer_obj.advance();
             all_input.push_back(lexer_obj.current_char());
+
+            if (mapStringtoType.count(all_input)) {
+                return check_if_keyword(all_input);
+            }
         }
         return check_if_keyword(all_input);
+    } else if (lexer_obj.current_char() == '"') {
+        lexer_obj.advance();
+        return Token {type::STRING, "placeholder"};
     }
 
     switch(lexer_obj.current_char())
@@ -171,13 +185,10 @@ Token build_token(std::string_view input)
             }
         case '/':
             lexer_obj.advance();
-            switch(lexer_obj.current_char())
-            {
-                case '/':
-                    return Token {type::COMMENT, "//"};
-                default:
-                    return Token {type::DIVISION, "/"};
-            }
+            return Token {type::DIVISION, "/"};
+        case ':':
+            lexer_obj.advance();
+            return Token {type::BEGIN, ":"};
         case '(':
             lexer_obj.advance();
             return Token {type::LPAREN, "("};
@@ -205,54 +216,13 @@ Token build_token(std::string_view input)
 
 }
 
-std::string removeSpaces(std::string &str)
-{
-    int n = str.length();
-    int i = 0, j = -1;
-    bool spaceFound = false;
- 
-    while (++j < n && str[j] == ' ');
- 
-    while (j < n)
-    {
-        if (str[j] != ' ')
-        {
-            if ((str[j] == '.' || str[j] == ',' ||
-                 str[j] == '?') && i - 1 >= 0 &&
-                 str[i - 1] == ' '){
-                    str[i - 1] = str[j++];
-                 } else {
-                    str[i++] = str[j++];
-                 }
-
-            spaceFound = false;
-        }
-        else if (str[j++] == ' ')
-        {
-            if (!spaceFound)
-            {
-                str[i++] = ' ';
-                spaceFound = true;
-            }
-        }
-    }
-    if (i <= 1){
-        str.erase(str.begin() + i, str.end());
-    } else {
-        str.erase(str.begin() + i - 1, str.end());
-    } 
-    return str;
-}
 
 std::deque<Token> build_all(std::string input)
 {
     LEXER lexer_object;
     lexer_object.m_index = 0;
-    input.push_back(' ');
-    input = removeSpaces(input);
-    lexer_object.m_input = input;
     std::deque<Token> all_tokens;
-    std::cout << "INPUT: " << input << "\n"; 
+    std::cout << "INPUT: " << input << "\n";
 
     while (true)
     {
@@ -275,22 +245,9 @@ std::deque<Token> build_all(std::string input)
 
     }
 
-
     return all_tokens;
 
 }
 
-int main()
-{
-    std::string input = "fn def(x1, x2) x1 + x2";
 
-    std::deque<Token> vec = build_all(input);
-
-    for (auto i : vec){
-        std::cout << i;
-    }
-
-}
-
-
-
+#endif
