@@ -31,33 +31,32 @@ void write(std::string input, bool end) {
     }
 }
 
-void startCodegen() {
-    ostream.open("cap.c");
-    write("int main(){\n", false);
+void encounteredMain() {
+    write("int main() {\n", false);
 }
 
-void endCodegen() {
+void encounteredEnd() {
     write("\n}", false);
-    ostream.close();
 }
 
-void integerliteral::codegen() {
+const std::string& integerliteral::codegen() {
     write(this->get_value(), false);
 }
 
-void callfunctionnode::codegen(){
-    write(this->callee() + "(", false);
+const std::string& callfunctionnode::codegen(){
+    write(this->callee + "(", false);
     
-    for (auto i : this->args) {
-        write(i->codegen() +",", false);
+    for (int i = 0; i < getArgs().size(); i++) {
+        std::shared_ptr<astnode> j = getArgs()[i];
+        write(j->codegen() + ",", false);
         
-        if (i == this->args[args.size() - 2]) {
-            write(i->codegen() + ")", false);
+        if (j == (this->getArgs())[getArgs().size() - 2]) {
+            write(j->codegen() + ")", false);
         }
     } 
 }
 
-void variabledeclaration::codegen() {
+const std::string& variabledeclaration::codegen() {
 
     if(this->getvariabletype() == "string"){
         std::string out = "char [";
@@ -69,40 +68,42 @@ void variabledeclaration::codegen() {
 
 }
 
-void protonode::codegen(){
+const std::string& protonode::codegen(){
     write(this->getName() + "(", false);
     
-    for (auto i : this->getArgs()) {
-        write(i->codegen() +",", false);
-        
-        if (i == this->getArgs()[getArgs().size() - 2]) {
-            write(i->codegen() + ")", true);
+    for (auto i : this->getArgs()) {        
+        if (i == this->getArgs()[getArgs().size() - 1]) {
+            write(i + ")", false);
+            break;
+        } else {
+            write(i + ",", false);
         }
     }
+
 }
 
-void callvariable::codegen() {
-    if (std::find(namedvalues.begin(), namedvalues.end(), this->get_identifier()) != namedvalues.end()) {
+const std::string& funcdefinitionnode::codegen() { 
+    this->proto->codegen(); write("{\n", false);
+    write("return ", false);
+    this->body->codegen();
+    write(";\n}", false);
+}
+
+const std::string& callvariable::codegen() {
+    if (std::find(namedvalues.begin(), namedvalues.end(), this->get_value()) != namedvalues.end()) {
         codegenerror {m_line, "Unknown variable referenced", ""};
     } else {
-        write(this->get_identifier(), false);
+        write(this->get_value(), false);
     }
 }
 
-void astnode::codegen() {
-    if (isNumber(this->get_value())) {
-        integerliteral integer(this->get_value());
-        integer.codegen();
-    } else {
-        callvariable var(this->get_value());
-        var.codegen();
-    }
+const std::string& astnode::codegen() {
+    write(this->get_value(), false);
 }
 
-void binaryoperation::codegen() {
-    this->left->codegen(); write(this->operation, false); this->right->codegen();
+const std::string& binaryoperation::codegen() {
+    write(this->get_value(), false);
 }
-
 
 int main()
 {
@@ -111,10 +112,10 @@ int main()
     getline(std::cin, input);
     std::deque<Token> alltokens = build_all(input); 
     parses.all_tokens = alltokens;
-        
+    
     parses.index = 0;
-    std::unique_ptr<variabledeclaration> bin = std::move(parses.parseVariable());
-    startCodegen();
+    std::shared_ptr<variabledeclaration> bin = parses.parseVariable();
+    ostream.open("cap.c");
     bin->codegen();
-    endCodegen();
+    ostream.close();
 }
