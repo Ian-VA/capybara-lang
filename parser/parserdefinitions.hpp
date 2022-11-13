@@ -5,19 +5,47 @@
 #include "lexer.hpp"
 #include <deque>
 
+std::shared_ptr<astnode> parserclass::parseBoolean()
+{
+    if (get_token().types != type::NOTEQUAL && get_token().types != type::EQUALSEQUALS) {
+        error {curr_line, "expected boolean expression, found unknown token", ""};
+    }
+
+    std::string val = get_token().value;
+    eat();
+    return std::make_shared<boolean>(val);
+
+}
+
 std::shared_ptr<ifstatement> parserclass::parseIfStatement()
 {
+    std::vector<std::shared_ptr<astnode>> body;
     if (get_token().types != type::IF) {
         error {curr_line, "Expected if keyword, found unknown token", ""};
     }
 
+    eat(); 
     auto boolean = parseExpression();
+    eat(); // :
 
-    if (auto body = parseExpression()) {
-        return std::make_shared<ifstatement>((boolean), (body));
-    } else {
-        error {curr_line, "Expected body for if statement", ""};
+    while (true)
+    {
+        if (auto e = parseExpression()) {
+            if (e->get_value() != "end"){
+                body.push_back(e);
+            } else {
+                body.push_back(e);
+                break;
+            }
+        }
+
+        if (body.empty()) {
+            break;
+        }
     }
+
+
+    return std::make_shared<ifstatement>(boolean, body);
     
 }
 
@@ -98,7 +126,7 @@ std::shared_ptr<astnode> parserclass::parseGroupedExpr()
     }
 
     eat();
-    return std::make_shared<groupedexpre>("(" + V->get_value() + ")");
+    return std::make_shared<groupedexpre>(V->get_value());
 }
 
 std::shared_ptr<callfunctionnode> parserclass::parseIdentifierCall()
@@ -286,6 +314,10 @@ std::shared_ptr<astnode> parserclass::primaryParserLoop()
                 return parseIdentifierCall();
             }
             std::cout << "parsed identifier" << "\n";
+            break;
+        case type::EQUALSEQUALS:
+        case type::NOTEQUAL:
+            return parseBoolean();
             break;
         case type::RETURN:  // since callvariables are parsed in codegen by just their identifier, keywords work here too
         case type::END:
