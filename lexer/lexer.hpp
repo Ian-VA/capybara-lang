@@ -17,14 +17,17 @@ std::map<std::string, type> mapStringtoType = {
     {"true", type::TRUE},
     {"false", type::FALSE},
     {"local", type::VAR},
-    {"fn", type::FUNC},
     {"const", type::CONST},
     {"if", type::IF},
     {"elseif", type::ELSEIF},
     {"else", type::ELSE},
     {"return", type::RETURN},
     {"end", type::END},
-    {"main", type::MAIN}
+    {"main", type::MAIN},
+    {"str", type::STRING},
+    {"int", type::INTEGER},
+    {"char", type::CHAR},
+    {"bool", type::BOOLEAN}
 };
 
 
@@ -57,7 +60,6 @@ Token check_if_keyword(std::string input)
         case type::TRUE:
         case type::FALSE:
         case type::VAR:
-        case type::FUNC:
         case type::CONST:
         case type::IF:
         case type::MAIN:
@@ -65,6 +67,10 @@ Token check_if_keyword(std::string input)
         case type::END:
         case type::ELSEIF:
         case type::ELSE:
+        case type::CHAR:
+        case type::INTEGER:
+        case type::STRING:
+        case type::BOOLEAN:
             return Token {Type, input};
         default:
             return Token {type::IDENTIFIER, input};
@@ -233,11 +239,11 @@ std::deque<Token> build_all(std::string input)
 
         if (position != std::string::npos){
             input.erase(position, token.value.length());
+
+            if (input[0] == ' '){
+                input.erase(0, 1);
+            }
         }
-
-        
-        input.erase(remove(input.begin(), input.end(), ' '), input.end());
-
 
         if(token.types == type::ENDINPUT){
             break;
