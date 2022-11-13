@@ -7,7 +7,7 @@
 #include "parserdefinitions.hpp"
 
 std::ofstream ostream;
-static std::vector<std::string> namedvalues; // yes, global variables are bad
+static std::vector<std::string> namedvalues = {"return", "end"}; // yes, global variables are bad
 int m_line = 0;
 
 class codegenerror
@@ -22,6 +22,18 @@ class codegenerror
             exit(1);
         }
 };
+
+class warning
+{
+    public:
+        warning(std::string warning, std::string note){
+            std::cout << "Warning: " << warning << "\n";
+            if (!note.empty()){
+                std::cout << "Note: " << note << "\n";
+            }
+        }
+};
+
 
 void write(std::string input, bool end) {
     ostream << input;
@@ -65,41 +77,70 @@ const std::string& variabledeclaration::codegen() {
     } else {
         write(this->getvariabletype() + " " + this->get_identifier() + "=" + this->get_value(), true);
     }
-
 }
 
 const std::string& protonode::codegen(){
     write(this->getName() + "(", false);
+    int j = 0;
     
-    for (auto i : this->getArgs()) {        
+    for (auto i : this->getArgs()) {       
         if (i == this->getArgs()[getArgs().size() - 1]) {
-            write(i + ")", false);
-            break;
+            if (this->getTypes()[j] == "str") {
+                write(std::string("char[") + std::to_string(i.size()) + ']' + i + ")", false);
+            } else {
+                write(this->getTypes()[j] + " " + i + ")", false);
+                break;
+            }
         } else {
-            write(i + ",", false);
+            if (this->getTypes()[j] == "str") {
+                write("char[" + std::to_string(i.size()) + "]" + i + ",", false);
+            } else {
+                write(this->getTypes()[j] + " " + i + ",", false);
+            }
         }
+        j++;
     }
 
-}
-
-const std::string& funcdefinitionnode::codegen() { 
-    this->proto->codegen(); write("{\n", false);
-    write("return ", false);
-    this->body->codegen();
-    write(";\n}", false);
-}
-
-const std::string& callvariable::codegen() {
-    if (std::find(namedvalues.begin(), namedvalues.end(), this->get_value()) != namedvalues.end()) {
-        codegenerror {m_line, "Unknown variable referenced", ""};
-    } else {
-        write(this->get_value(), false);
-    }
 }
 
 const std::string& astnode::codegen() {
     write(this->get_value(), false);
 }
+
+
+const std::string& funcdefinitionnode::codegen() { 
+
+    if (this->proto->getName() == "main"){
+        write("int main(){\n", false);
+
+        for(auto s : this->body) {
+            if (s->get_value() != "end"){
+                s->codegen();
+                write(" ", false);
+            } else {
+                write(";\n}", false);
+            }
+        }
+
+    } else {
+        write(this->getReturnType() + " ", false); this->proto->codegen(); write("{\n", false);
+
+        for(auto s : this->body) {
+            if (s->get_value() != "end"){
+                s->codegen();
+                write(" ", false);
+            } else {
+                write(";\n}", false);
+            }
+        }
+
+    }
+}
+
+const std::string& callvariable::codegen() {
+    write(this->get_value(), false);
+}
+
 
 const std::string& binaryoperation::codegen() {
     write(this->get_value(), false);
@@ -112,9 +153,13 @@ int main()
     getline(std::cin, input);
     std::deque<Token> alltokens = build_all(input); 
     parses.all_tokens = alltokens;
+
+    for (auto i : alltokens){
+        std::cout << i;
+    }
     
     parses.index = 0;
-    std::shared_ptr<variabledeclaration> bin = parses.parseVariable();
+    std::shared_ptr<funcdefinitionnode> bin = parses.parseDefinition();
     ostream.open("cap.c");
     bin->codegen();
     ostream.close();
