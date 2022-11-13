@@ -94,11 +94,11 @@ std::shared_ptr<astnode> parserclass::parseGroupedExpr()
     auto V = parseExpression();
 
     if (!V || get_token().value != ")") {
-        return nullptr;
+        error {curr_line, "No closing parentheses in groupedexpr", ""};
     }
 
     eat();
-    return V;
+    return std::make_shared<groupedexpre>("(" + V->get_value() + ")");
 }
 
 std::shared_ptr<callfunctionnode> parserclass::parseIdentifierCall()
@@ -129,7 +129,7 @@ std::shared_ptr<callfunctionnode> parserclass::parseIdentifierCall()
 
 std::shared_ptr<protonode> parserclass::parsePrototype()
 {
-    if (get_token().types != type::IDENTIFIER) {
+    if (get_token().types != type::IDENTIFIER && get_token().types != type::MAIN) {
         error {curr_line, "Expected identifier in function prototype", ""};
     } else {
         std::string name = get_token().value;
@@ -139,21 +139,31 @@ std::shared_ptr<protonode> parserclass::parsePrototype()
         } else {
             eat();
             std::vector<std::string> args;
-            while (get_token().types == type::IDENTIFIER)
+            std::vector<std::string> types;
+            while (get_token().types == type::CHAR || get_token().types == type::STRING || get_token().types == type::INTEGER || get_token().types == type::BOOLEAN)
             {
+                types.push_back(get_token().value);
+                eat();
                 args.push_back(get_token().value);
                 eat();
-                if (get_token().value != "," && peek_token().types == type::IDENTIFIER && get_token().value != ")") {
-                    error {curr_line, "Expected ',' seperating function arguments", ""};
-                } else if (get_token().value == ","){
-                    eat();
-                }
+
+                if (peek_token().types == type::CHAR || peek_token().types == type::STRING || peek_token().types == type::INTEGER || peek_token().types == type::BOOLEAN) {
+                    if (get_token().value != ")") {
+                        if (get_token().value != ","){
+                            error {curr_line, "Expected ',' seperating function arguments", ""};
+                        } else {
+                            eat();
+                        }
+                    } else {
+                        break;
+                    }
+                } 
             }
             if (get_token().value != ")"){
                 error {curr_line, "Expected ')' in function prototype", ""};
             } else {
                 eat();
-                return std::make_shared<protonode>(name, args);
+                return std::make_shared<protonode>(name, args, types);
             }
         }
     }
@@ -161,18 +171,17 @@ std::shared_ptr<protonode> parserclass::parsePrototype()
 
 std::shared_ptr<funcdefinitionnode> parserclass::parseDefinition()
 {
-    eat();
     std::string typeinf = "";
     auto proto = parsePrototype();
+    std::vector<std::shared_ptr<astnode>> body;
 
     if (get_token().types != type::BEGIN) {
         error {curr_line, "No begin statement for function", "Possible prototyping error"};
     } else {
         eat();
 
-         for (int i = 1; i < all_tokens.size(); i++) {
+         for (int i = 0; i < all_tokens.size(); i++) {
             if (all_tokens[i].types == type::RETURN) {
-                std::cout << "YAY FOUND RETURN";
                 if (all_tokens[i+1].types != type::ENDINPUT){
                     switch(all_tokens[i+1].types){
                         case type::IDENTIFIER:
@@ -182,6 +191,7 @@ std::shared_ptr<funcdefinitionnode> parserclass::parseDefinition()
                                 case type::TIMES:
                                 case type::DIVISION:
                                     typeinf = "int";
+                                    break;
                                 case type::COMPARE:
                                 case type::GREATERTHAN:
                                 case type::GREATERTHANOREQUALTO:
@@ -189,15 +199,28 @@ std::shared_ptr<funcdefinitionnode> parserclass::parseDefinition()
                                 case type::LESSTHAN:
                                 case type::LESSTHANOREQUALTO:
                                     typeinf = "bool";
+                                    break;
                                 default:
-                                    if (std::isalpha(all_tokens[i+1].value[0])) {
-                                        if (std::isalpha(all_tokens[i+1].value[1])){
-                                            typeinf = "char[]";
-                                        } else {
-                                            typeinf = "char";
+                                    for (int j = 0; j < proto->getArgs().size(); j++) {
+                                        if (all_tokens[i+1].value == proto->getArgs()[j]){
+                                            typeinf = proto->getTypes()[j];
+                                            break;
                                         }
-                                    } else if (isNumber(all_tokens[i+1].value)) {
-                                        typeinf = "int";
+                                    }
+
+                                    if (!typeinf.empty()) {
+                                        break;
+                                    } else {
+                                        if (std::isalpha(all_tokens[i+1].value[0])) {
+                                            if (std::isalpha(all_tokens[i+1].value[1])){
+                                                typeinf = "string";
+                                            } else {
+                                                typeinf = "char";
+                                            }
+                                        } else if (isNumber(all_tokens[i+1].value)) {
+                                            typeinf = "int";
+                                        }
+
                                     }
                             }
                         
@@ -209,22 +232,42 @@ std::shared_ptr<funcdefinitionnode> parserclass::parseDefinition()
         }
  
         if (typeinf.empty()) typeinf = "void";
-        
-        if (auto e = parseExpression()) {
-            return std::make_shared<funcdefinitionnode>((proto), (e));
-        } else {
-            error {curr_line, "No body found for function definition", ""};
+        std::cout << typeinf << "\n";
+
+        while (true)
+        {
+            if (auto e = parseExpression()) {
+                if (e->get_value() != "end"){
+                    body.push_back(e);
+                } else {
+                    body.push_back(e);
+                    break;
+                }
+            }
+
+
+            if (body.empty()) {
+                break;
+            }
         }
+
+        for (auto i : body){
+            std::cout << i->get_value();
+        }
+
+        return std::make_shared<funcdefinitionnode>(proto, body, typeinf);            
     }
 }
 
 std::shared_ptr<funcdefinitionnode> parserclass::parseTopLevelExpr()
 {
-    if (auto e = parseExpression()){
-        auto proto = std::make_shared<protonode>("", std::vector<std::string>());
-        return std::make_shared<funcdefinitionnode>((proto), (e));
+    std::vector<std::shared_ptr<astnode>> body;
+    for (auto e = parseExpression(); e->get_value() != "end";) {
+        body.push_back(e);
     }
-    return nullptr;
+
+    auto proto = std::make_shared<protonode>("", std::vector<std::string>(), std::vector<std::string>());
+    return std::make_shared<funcdefinitionnode>((proto), (body), std::string("void"));
 }
 
 
@@ -243,21 +286,23 @@ std::shared_ptr<astnode> parserclass::primaryParserLoop()
                 return parseIdentifierCall();
             }
             std::cout << "parsed identifier" << "\n";
+            break;
+        case type::RETURN:  // since callvariables are parsed in codegen by just their identifier, keywords work here too
+        case type::END:
+            return parseCallVariable();
+            break;
         case type::NUM:
-            if (peek_token().value == "+" || peek_token().value == "-" || peek_token().value == "/" || peek_token().value == "*") {
-                std::cout << "parsed binop" << "\n";
-                return parseOperation();
-            }
             std::cout << "parsed integer" << "\n";
             return parseInteger();
+            break;
         case type::LPAREN:
             return parseGroupedExpr();
-        case type::MAIN:
-            encountered_main = true;
+            break;
         default:
-            std::cout << "Unknown token when expecting expression" << "\n";
-            return nullptr;
-    }
+            break;
+    
+    }       
+
 }
 
 #endif
