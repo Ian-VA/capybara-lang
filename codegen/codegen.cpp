@@ -51,6 +51,18 @@ void encounteredEnd() {
     write("\n}", false);
 }
 
+const std::string& ifstatement::codegen() {
+    write("\nif(", false); this->condition->codegen();
+    write("){\n", false);
+
+    for (int i = 0; i < this->body.size()-1; i++){
+        std::shared_ptr<astnode> j = this->body[i];
+        j->codegen(); write(" ", false);
+    }
+
+    write("\n}", false);
+}
+
 const std::string& integerliteral::codegen() {
     write(this->get_value(), false);
 }
@@ -159,7 +171,7 @@ int main()
     }
     
     parses.index = 0;
-    std::shared_ptr<funcdefinitionnode> bin = parses.parseDefinition();
+    std::shared_ptr<ifstatement> bin = parses.parseIfStatement();
     ostream.open("cap.c");
     bin->codegen();
     ostream.close();
