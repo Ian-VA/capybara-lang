@@ -34,7 +34,6 @@ class astnode
         }
 
         virtual const std::string& codegen();
-        bool isReturnExpression = false;
 
     private:
         std::string value;
@@ -87,6 +86,18 @@ class binaryoperation : public astnode
         
         const virtual std::string& codegen();
 
+};
+
+class keyword : public astnode
+{
+    std::string value;
+
+    public:
+        virtual std::string get_value() const override {
+            return value;
+        }
+
+        keyword(const std::string& value) : value(value) {}
 };
 
 class variabledeclaration : public astnode
@@ -150,32 +161,43 @@ class callfunctionnode : public astnode
     public:
         const std::string& codegen();
         callfunctionnode(const std::string &callee, std::vector<std::shared_ptr<astnode>> args) : callee(callee), args((args)) {}
-        const std::vector<std::shared_ptr<astnode>> &getArgs() const {return (args);}
+        std::vector<std::shared_ptr<astnode>> getArgs() const {return (args);}
+};
+
+class groupedexpre: public astnode
+{
+    std::string value;
+    
+    public:
+        groupedexpre(std::string value) : value(value) {}
 };
 
 class protonode 
 {
     std::string name;
     std::vector<std::string> args;
+    std::vector<std::string> argtypes;
 
     public:
         const std::string& codegen();
-        protonode(const std::string& name, std::vector<std::string> args) : name(name), args(args) {}
+        const std::vector<std::string> &getTypes() const {return argtypes;}
+        protonode(const std::string& name, std::vector<std::string> args, std::vector<std::string> argtypes) : name(name), args(args), argtypes(argtypes) {}
         const std::string &getName() const { return name; }
         const std::vector<std::string> &getArgs() const {return args;}
 };
 
 class funcdefinitionnode
 {
-    std::shared_ptr<protonode> proto;
-    std::shared_ptr<astnode> body;
+    std::vector<std::shared_ptr<astnode>> body;
     std::string returntype;
+    std::vector<std::string> argtypes;
 
     public:
-        const std::string& getBody() {return body->get_value();}
+        std::shared_ptr<protonode> proto;
+        const std::vector<std::shared_ptr<astnode>> getBody() {return body;}
         const std::string& codegen();
-        const std::string& getReturnType() const {return returntype;}
-        funcdefinitionnode(std::shared_ptr<protonode> proto, std::shared_ptr<astnode> body) : proto((proto)), body((body)) {}
+        std::string getReturnType() const {return returntype;}
+        funcdefinitionnode(std::shared_ptr<protonode> proto, std::vector<std::shared_ptr<astnode>> body, std::string returntype) : proto((proto)), body((body)), returntype(returntype) {}
 };
 
 class ifstatement
@@ -248,9 +270,9 @@ struct parserclass
         all_tokens.pop_front();
     }
 
+    std::shared_ptr<keyword> parseKeyword();
     std::shared_ptr<astnode> parseStatement();
     std::shared_ptr<astnode> parseGroupedExpr();
-
     std::shared_ptr<integerliteral> parseInteger();
     std::shared_ptr<variabledeclaration> parseVariable();
     std::shared_ptr<binaryoperation> parseOperation();
@@ -302,6 +324,11 @@ struct parserclass
         }
 
         auto l = primaryParserLoop();
+         
+        if (l->get_value() == "return"){
+            return l;
+        }
+
         if (!l) {
             return nullptr;
         } else {
