@@ -13,7 +13,6 @@ enum astnodetype
     stringliteral,
     variable,
     ifs,
-    boolean,
     null,
     groupedexpr,
     comparison,
@@ -85,6 +84,19 @@ class binaryoperation : public astnode
         }
         
         const virtual std::string& codegen();
+
+};
+
+class boolean : public astnode
+{
+    std::string value;
+
+    public:
+        virtual std::string get_value() const override {
+            return value;
+        }
+
+        boolean(const std::string& value) : value(value) {}
 
 };
 
@@ -203,14 +215,14 @@ class funcdefinitionnode
 class ifstatement
 {
     std::shared_ptr<astnode> condition;
-    std::shared_ptr<astnode> body;
+    std::vector<std::shared_ptr<astnode>> body;
 
     public:
         std::shared_ptr<astnode> get_condition() {
             return (condition);
         }
-
-        ifstatement(std::shared_ptr<astnode> condition, std::shared_ptr<astnode> body) : condition((condition)), body((body)) {}
+        const std::string& codegen();
+        ifstatement(std::shared_ptr<astnode> condition, std::vector<std::shared_ptr<astnode>> body) : condition((condition)), body((body)) {}
 };
 
 class error
@@ -234,6 +246,8 @@ struct parserclass
     int index = 0;
 
     std::map<std::string, int> precedence = {
+        {"==", 10},
+        {"!=", 10},
         {"<", 10},
         {">", 10},
         {"+", 20},
@@ -277,7 +291,7 @@ struct parserclass
     std::shared_ptr<variabledeclaration> parseVariable();
     std::shared_ptr<binaryoperation> parseOperation();
     std::shared_ptr<callvariable> parseCallVariable();
-    std::shared_ptr<astnode> parseComparison();
+    std::shared_ptr<astnode> parseBoolean();
     std::shared_ptr<ifstatement> parseIfStatement();
     std::shared_ptr<callfunctionnode> parseIdentifierCall();
     std::shared_ptr<protonode> parsePrototype();
