@@ -2,8 +2,11 @@
 
 # capybara-lang 
 
-WIP Compiler for a dynamically typed, pythonic programming language with Rust and Lua elements called Capybara
+![image](https://img.shields.io/badge/contributors-1-yellow)
 
-Written in C++ and designed for ease of writing and reading good quality code
+## Capybara is now functional as of November 15th, 2022
 
-Docs Coming Soon, PRs and Criticism welcome
+###### About Capybara
+
+Capybara is a statically typed, semi-whitespace sensitive programming language, taking the best parts from Lua, Rust, and Python to create a readable, comprehensive and simple programming language.
+
