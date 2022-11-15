@@ -4,7 +4,7 @@
 
 ![image](https://img.shields.io/badge/contributors-1-yellow) ![image](https://img.shields.io/badge/commits-171-yellow) ![image](https://img.shields.io/badge/status-functional-brightgreen)
 
-### As of November 15th, 2022, Capybara has achieved functionality
+### :heavy_exclamation_mark:	As of November 15th, 2022, Capybara has achieved beta status :heavy_exclamation_mark:	
 
 ##### About Capybara
 
