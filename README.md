@@ -1,4 +1,4 @@
-<img src="https://user-images.githubusercontent.com/53247327/201985947-b7f4dd84-e05a-4965-b4ac-fc88ace0838f.png" width="150">
+<img src="https://user-images.githubusercontent.com/53247327/201985947-b7f4dd84-e05a-4965-b4ac-fc88ace0838f.png" width="200">
 
 # capybara-lang 
 
