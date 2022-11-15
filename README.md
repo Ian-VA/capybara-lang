@@ -2,7 +2,7 @@
 
 # capybara-lang 
 
-![image](https://img.shields.io/badge/contributors-1-yellow)
+![image](https://img.shields.io/badge/contributors-1-yellow) ![image](https://img.shields.io/badge/commits-171-yellow) ![image](https://img.shields.io/badge/status-functional-brightgreen)
 
 ## Capybara is now functional as of November 15th, 2022
 
