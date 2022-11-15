@@ -24,7 +24,7 @@ At the same time, low level languages don't provide the myriad of comforts that 
 * Dynamic typing
 * Flexibility
 
-Capybara is meant to provide the best of both worlds, allowing both high level and low level programmers to transfer seamlessly between the two, to accomplish this, Capybara provides:
+Capybara is meant to provide the best of both worlds, allowing both high level and low level programmers to transfer seamlessly between the two. To accomplish this, Capybara provides:
 
 * Readability
 * Power and Speed
