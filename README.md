@@ -37,13 +37,13 @@ Capybara is meant to provide the best of both worlds, allowing both high level a
 Here's an example of some code in Capybara:
 
 ```
-show(int x1, ptr int x2):
+show(int x1, ptr int x2): # all function arguments must be statically typed
   x2++ # capybara allows for pointer arithmetic
   return x1
 
 main():
-  x1 = 3
-  ptr x2 = 5
+  x1 = 3 # variables can be inferred
+  ptr x2 = 5 # unlike other languages, capybara declared a pointer with the 'ptr' keyword
   add(x1, x2)
 ```
 
