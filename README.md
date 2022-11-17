@@ -43,7 +43,7 @@ show(int x1, ptr int x2): # all function arguments must be statically typed
 
 main():
   x1 = 3 # variables can be inferred
-  ptr x2 = 5 # unlike other languages, capybara declared a pointer with the 'ptr' keyword
+  ptr x2 = 5 # unlike other languages, you declare a pointer with the 'ptr' keyword
   add(x1, x2)
 ```
 
