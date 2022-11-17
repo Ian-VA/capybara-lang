@@ -34,6 +34,19 @@ Capybara is meant to provide the best of both worlds, allowing both high level a
 * Compatibility with new technology
 * and a lot more!
 
+Here's an example of some code in Capybara:
+
+```
+show(int x1, ptr int x2):
+  x2++ # capybara allows for pointer arithmetic
+  return x1
+
+main():
+  x1 = 3
+  ptr x2 = 5
+  add(x1, x2)
+```
+
 ### Where do I get Capybara?
 
 :warning: Capybara is currently too early in its development for it to be viable in a production setting. Capybara should only be meant for hobbyist use until it has been decreed stable enough to warrant otherwise. :warning:
