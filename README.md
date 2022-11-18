@@ -40,11 +40,13 @@ Here's an example of some code in Capybara:
 show(int x1, ptr int x2): # all function arguments must be statically typed
   x2++ # capybara allows for pointer arithmetic
   return x1
+end
 
 main():
   x1 = 3 # variables can be inferred
   ptr x2 = 5 # unlike other languages, you declare a pointer with the 'ptr' keyword
   add(x1, x2)
+end
 ```
 
 ### Where do I get Capybara?
