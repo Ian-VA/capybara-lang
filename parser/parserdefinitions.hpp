@@ -95,7 +95,7 @@ std::shared_ptr<callvariable> parserclass::parseCallVariable()
 std::shared_ptr<binaryoperation> parserclass::parseOperation()
 {
     if (get_token().types == type::NUM){
-        std::shared_ptr<astnode> right = (parseInteger()); // eat first num
+        std::shared_ptr<astnode> right = parseInteger(); // eat first num
         
         if (get_token().types != type::PLUS && get_token().types != type::SUBTRACT && get_token().types != type::TIMES && get_token().types != type::DIVISION){
             error {curr_line, "Expected operation, found unknown token", ""};
@@ -107,7 +107,7 @@ std::shared_ptr<binaryoperation> parserclass::parseOperation()
                 error {curr_line, "Expected integer after operation, found unknown token", ""};
                 return nullptr;
             } else {
-                std::shared_ptr<astnode> left = (parseInteger()); // eat second num
+                std::shared_ptr<astnode> left = parseInteger(); // eat second num
                 
                 return std::make_shared<binaryoperation>(operation, (right), (left));
             }
@@ -140,10 +140,10 @@ std::shared_ptr<callfunctionnode> parserclass::parseIdentifierCall()
         if (auto arg = parseExpression()){
             args.push_back((arg)); // push back arg
 
-            if (get_token().value != ",") {
+            if (get_token().value != "," && get_token().value != ")") {
                 error {curr_line, "Expected ',' or ')' in function argument list", ""};
             } else {
-                eat(); // eat ,
+                if (get_token().value != ")") eat(); // eat ,
             }
         } else {
             error {curr_line, "Argument error in function " + identifiername, "Are you sure your arguments are variables?"};
@@ -151,6 +151,7 @@ std::shared_ptr<callfunctionnode> parserclass::parseIdentifierCall()
     }
 
     eat(); // eat ')'
+
     return std::make_shared<callfunctionnode>(identifiername, (args));
 
 }
@@ -260,7 +261,6 @@ std::shared_ptr<funcdefinitionnode> parserclass::parseDefinition()
         }
  
         if (typeinf.empty()) typeinf = "void";
-        std::cout << typeinf << "\n";
 
         while (true)
         {
@@ -279,10 +279,6 @@ std::shared_ptr<funcdefinitionnode> parserclass::parseDefinition()
             }
         }
 
-        for (auto i : body){
-            std::cout << i->get_value();
-        }
-
         return std::make_shared<funcdefinitionnode>(proto, body, typeinf);            
     }
 }
@@ -298,19 +294,30 @@ std::shared_ptr<funcdefinitionnode> parserclass::parseTopLevelExpr()
     return std::make_shared<funcdefinitionnode>((proto), (body), std::string("void"));
 }
 
+std::shared_ptr<astnode> parserclass::allOtherParse() {
+    switch(get_token().types)
+    {
+        case type::IF:
+            return parseIfStatement();
+    }
+}
+
 
 std::shared_ptr<astnode> parserclass::primaryParserLoop()
 {
     switch (get_token().types)
     {
+        case type::VAR:
+            return parseVariable();
+            break;
         case type::IDENTIFIER:
             if (peek_token().value != "(") {
-                if (get_token().value != "local") {
-                    return parseCallVariable();
-                } else {
-                    return parseVariable();
-                }
+                return parseCallVariable();
             } else {
+                if (all_tokens[index + 2].value == "int" || all_tokens[index + 2].value == "str" || all_tokens[index + 2].value == "char" || all_tokens[index + 2].value == "bool" || get_token().types == type::MAIN) {
+                    return parseDefinition();
+                }
+
                 return parseIdentifierCall();
             }
             std::cout << "parsed identifier" << "\n";
@@ -335,6 +342,24 @@ std::shared_ptr<astnode> parserclass::primaryParserLoop()
     
     }       
 
+}
+
+std::deque<std::shared_ptr<astnode>> parserclass::parseAll()
+{
+    std::deque<std::shared_ptr<astnode>> allnodes;
+
+    while (true)
+    {
+        std::shared_ptr<astnode> data = parseDefinition();
+        allnodes.push_back(data);
+
+        if (get_token().value == "EOF"){
+            break;
+        }
+
+    }
+
+    return allnodes;
 }
 
 #endif
