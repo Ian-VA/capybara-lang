@@ -18,6 +18,7 @@ enum astnodetype
     comparison,
     functioncall,
     functiondeclaration,
+    protonodes
 };
 
 class astnode
@@ -83,7 +84,7 @@ class binaryoperation : public astnode
             return operation[0]; // bandaid for switch statements.. will fix when it becomes a problem with operators like += 
         }
         
-        const virtual std::string& codegen();
+        const virtual std::string& codegen() {}
 
 };
 
@@ -160,7 +161,7 @@ class callvariable : public astnode
         virtual std::string get_value() const override {
             return value;
         }
-        const virtual std::string& codegen();
+        const virtual std::string& codegen() {}
     
         callvariable(const std::string &identifier) : value(identifier) {}
 };
@@ -172,6 +173,11 @@ class callfunctionnode : public astnode
 
     public:
         const std::string& codegen();
+
+        virtual std::string get_value() const override {
+            return callee;
+        }
+
         callfunctionnode(const std::string &callee, std::vector<std::shared_ptr<astnode>> args) : callee(callee), args((args)) {}
         std::vector<std::shared_ptr<astnode>> getArgs() const {return (args);}
 };
@@ -184,35 +190,45 @@ class groupedexpre: public astnode
         groupedexpre(std::string value) : value(value) {}
 };
 
-class protonode 
+class protonode : public astnode
 {
     std::string name;
     std::vector<std::string> args;
     std::vector<std::string> argtypes;
-
+    
     public:
+        virtual std::string get_value() const override {
+            return name + "proto";
+        }
+
         const std::string& codegen();
         const std::vector<std::string> &getTypes() const {return argtypes;}
         protonode(const std::string& name, std::vector<std::string> args, std::vector<std::string> argtypes) : name(name), args(args), argtypes(argtypes) {}
         const std::string &getName() const { return name; }
         const std::vector<std::string> &getArgs() const {return args;}
+        const virtual astnodetype get_type() {return astnodetype::protonodes;}
 };
 
-class funcdefinitionnode
+class funcdefinitionnode : public astnode
 {
     std::vector<std::shared_ptr<astnode>> body;
     std::string returntype;
     std::vector<std::string> argtypes;
 
     public:
+        virtual std::string get_value() const override {
+            return "definition";
+        }
+
         std::shared_ptr<protonode> proto;
         const std::vector<std::shared_ptr<astnode>> getBody() {return body;}
         const std::string& codegen();
+        const virtual astnodetype get_type() {return astnodetype::functiondeclaration;}
         std::string getReturnType() const {return returntype;}
         funcdefinitionnode(std::shared_ptr<protonode> proto, std::vector<std::shared_ptr<astnode>> body, std::string returntype) : proto((proto)), body((body)), returntype(returntype) {}
 };
 
-class ifstatement
+class ifstatement : public astnode
 {
     std::shared_ptr<astnode> condition;
     std::vector<std::shared_ptr<astnode>> body;
@@ -221,6 +237,7 @@ class ifstatement
         std::shared_ptr<astnode> get_condition() {
             return (condition);
         }
+        const virtual astnodetype get_type() {return astnodetype::ifs;}
         const std::string& codegen();
         ifstatement(std::shared_ptr<astnode> condition, std::vector<std::shared_ptr<astnode>> body) : condition((condition)), body((body)) {}
 };
@@ -298,6 +315,8 @@ struct parserclass
     std::shared_ptr<funcdefinitionnode> parseDefinition();
     std::shared_ptr<funcdefinitionnode> parseTopLevelExpr();
     std::shared_ptr<astnode> primaryParserLoop();
+    std::shared_ptr<astnode> allOtherParse();
+    std::deque<std::shared_ptr<astnode>> parseAll();
     
     std::shared_ptr<astnode> parseOperationRHS(int exprprec, std::shared_ptr<astnode> l) { // l here being a parsed identifier or number (anything else is returned automatically)
         while (true)
