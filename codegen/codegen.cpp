@@ -131,7 +131,6 @@ const std::string& astnode::codegen() {
     {
         case astnodetype::functiondeclaration:
         {
-            std::cout << "hi";
             std::shared_ptr<funcdefinitionnode> gen = std::make_shared<funcdefinitionnode>(dynamic_cast<funcdefinitionnode&>(*this)); gen->codegen();
             break;
         }
