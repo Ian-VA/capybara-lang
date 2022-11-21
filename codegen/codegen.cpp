@@ -69,15 +69,22 @@ const std::string& integerliteral::codegen() {
 
 const std::string& callfunctionnode::codegen(){
     write(this->callee + "(", false);
-    
-    for (int i = 0; i < getArgs().size(); i++) {
-        std::shared_ptr<astnode> j = getArgs()[i];
-        write(j->codegen() + ",", false);
-        
-        if (j == (this->getArgs())[getArgs().size() - 2]) {
-            write(j->codegen() + ")", false);
+
+    if (!this->getArgs().empty()){
+        if (this->getArgs().size() != 1){
+            for (auto i : this->getArgs()) {
+                if (i == this->getArgs()[getArgs().size() - 1]){
+                    write(i->get_value() + ")", false);
+                } else {
+                    write(i->get_value() + ",", false);
+                }
+            }
+        } else {
+            write(getArgs()[0]->get_value() + ")", false);
         }
-    } 
+    } else {
+        write(")", false);
+    }
 }
 
 const std::string& variabledeclaration::codegen() {
@@ -85,9 +92,9 @@ const std::string& variabledeclaration::codegen() {
     if(this->getvariabletype() == "string"){
         std::string out = "char [";
         out.push_back(this->get_value().size());
-        write(out + "]" + this->get_identifier() + "=" + this->get_value(), true);
+        write(out + "]" + this->get_identifier() + "=" + this->get_value(), false);
     } else {
-        write(this->getvariabletype() + " " + this->get_identifier() + "=" + this->get_value(), true);
+        write(this->getvariabletype() + " " + this->get_identifier() + "=" + this->get_value(), false);
     }
 }
 
@@ -95,84 +102,149 @@ const std::string& protonode::codegen(){
     write(this->getName() + "(", false);
     int j = 0;
     
-    for (auto i : this->getArgs()) {       
-        if (i == this->getArgs()[getArgs().size() - 1]) {
-            if (this->getTypes()[j] == "str") {
-                write(std::string("char[") + std::to_string(i.size()) + ']' + i + ")", false);
+    if (!this->getArgs().empty()){
+        for (auto i : this->getArgs()) {       
+            if (i == this->getArgs()[getArgs().size() - 1]) {
+                if (this->getTypes()[j] == "str") {
+                    write(std::string("char[") + std::to_string(i.size()) + ']' + i + ")", false);
+                } else {
+                    write(this->getTypes()[j] + " " + i + ")", false);
+                    break;
+                }
             } else {
-                write(this->getTypes()[j] + " " + i + ")", false);
-                break;
+                if (this->getTypes()[j] == "str") {
+                    write("char[" + std::to_string(i.size()) + "]" + i + ",", false);
+                } else {
+                    write(this->getTypes()[j] + " " + i + ",", false);
+                }
             }
-        } else {
-            if (this->getTypes()[j] == "str") {
-                write("char[" + std::to_string(i.size()) + "]" + i + ",", false);
-            } else {
-                write(this->getTypes()[j] + " " + i + ",", false);
-            }
+            j++;
         }
-        j++;
+    } else {
+        write(")", false);
     }
 
 }
 
 const std::string& astnode::codegen() {
-    write(this->get_value(), false);
+    switch(this->get_type())
+    {
+        case astnodetype::functiondeclaration:
+        {
+            std::cout << "hi";
+            std::shared_ptr<funcdefinitionnode> gen = std::make_shared<funcdefinitionnode>(dynamic_cast<funcdefinitionnode&>(*this)); gen->codegen();
+            break;
+        }
+        case astnodetype::protonodes:
+        {
+            std::shared_ptr<protonode> gen = std::make_shared<protonode>(dynamic_cast<protonode&>(*this)); gen->codegen();
+            break;
+        }
+        case astnodetype::variable:
+        {
+            std::shared_ptr<variabledeclaration> gen = std::make_shared<variabledeclaration>(dynamic_cast<variabledeclaration&>(*this)); gen->codegen();
+            break;
+        }
+        case astnodetype::functioncall:
+        {
+            std::shared_ptr<callfunctionnode> gen = std::make_shared<callfunctionnode>(dynamic_cast<callfunctionnode&>(*this)); gen->codegen();
+            break;
+        }
+        case astnodetype::ifs:
+        {
+            std::shared_ptr<ifstatement> gen = std::make_shared<ifstatement>(dynamic_cast<ifstatement&>(*this)); gen->codegen();
+            break;
+        }
+        default:
+            write(this->get_value(), false);
+            break;
+    }    
 }
-
 
 const std::string& funcdefinitionnode::codegen() { 
 
     if (this->proto->getName() == "main"){
         write("int main(){\n", false);
 
-        for(auto s : this->body) {
-            if (s->get_value() != "end"){
-                s->codegen();
-                write(" ", false);
-            } else {
-                write(";\n}", false);
+        if (!this->body.empty() || this->body[0]->get_value() != "end"){
+            for(auto s : this->body) {
+                if (s->get_value() != "end"){
+                    s->codegen();
+
+                    if (s->get_value() != "return"){
+                        write(" ", true);
+                    } else {
+                        write(" ", false);
+                    }
+
+                } else {
+                    write("\n}", false);
+                    write("\n", false);
+                }
             }
         }
 
     } else {
         write(this->getReturnType() + " ", false); this->proto->codegen(); write("{\n", false);
 
-        for(auto s : this->body) {
-            if (s->get_value() != "end"){
-                s->codegen();
-                write(" ", false);
-            } else {
-                write(";\n}", false);
+        if (!this->body.empty() || this->body[0]->get_value() != "end"){
+            for(auto s : this->body) {
+                if (s->get_value() != "end"){
+                    s->codegen();
+
+                    if (s->get_value() != "return"){
+                        write(" ", true);
+                    } else {
+                        write(" ", false);
+                    }
+
+                } else {
+                    write("\n}", false);
+                    write("\n", false);
+                }
             }
         }
-
     }
 }
 
-const std::string& callvariable::codegen() {
-    write(this->get_value(), false);
+
+void compile(std::string input) 
+{
+    parserclass parses;
+    std::deque<Token> alltokens = build_all(input); 
+    parses.all_tokens = alltokens;
+    std::deque<std::shared_ptr<astnode>> data = parses.parseAll();
+
+    ostream.open("cap.c");
+
+    for (auto i : data){
+        i->codegen();
+    }
+
+    ostream.close();
+    system("gcc -o cap.exe cap.c");
+
 }
 
-
-const std::string& binaryoperation::codegen() {
-    write(this->get_value(), false);
+void run()
+{
+    system("cap.exe");
 }
 
 int main()
 {
-    parserclass parses;
     std::string input;
-    getline(std::cin, input);
-    std::deque<Token> alltokens = build_all(input); 
-    parses.all_tokens = alltokens;
-
-    for (auto i : alltokens){
-        std::cout << i;
+    while (true) {
+        std::cout << "capybara> ";
+        if (!std::getline(std::cin, input)) {
+            break;
+        } else {
+            if (input.find("compile") != std::string::npos) {
+                input.erase(input.find("compile"), 8);
+                compile(input);
+            } else if (input == "run") {
+                run();
+            }
+        }
     }
-    
-    parses.index = 0;
-    std::shared_ptr<ifstatement> bin = parses.parseIfStatement();
-    ostream.open("cap.c");
-    bin->codegen();
-    ostream.close();
 }
