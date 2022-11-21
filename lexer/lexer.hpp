@@ -8,6 +8,7 @@
 #include <string_view>
 #include "classes.hpp"
 #include "utilfunctions.hpp"
+#include <fstream>
 #include <deque>
 #include <regex>
 #include <map>
@@ -216,6 +217,8 @@ Token build_token(std::string_view input)
         case ',':
             lexer_obj.advance();
             return Token {type::ARGSEPARATE, ","};
+        case '\t':
+            lexer_obj.advance();
         default:
             return unique_objects(lexer_obj.current_char(), lexer_obj.m_input, lexer_obj.m_index);
     }
@@ -223,11 +226,18 @@ Token build_token(std::string_view input)
 }
 
 
-std::deque<Token> build_all(std::string input)
+std::deque<Token> build_all(std::string file)
 {
+    std::ifstream t(file + ".cb");
+    std::string input;
+    std::stringstream buffer;
+    buffer << t.rdbuf();
+    input = buffer.str();
+
     LEXER lexer_object;
     lexer_object.m_index = 0;
     std::deque<Token> all_tokens;
+    input.erase(std::remove_if(input.begin(), input.end(), ::isspace), input.end());
     std::cout << "INPUT: " << input << "\n";
 
     while (true)
@@ -244,6 +254,8 @@ std::deque<Token> build_all(std::string input)
                 input.erase(0, 1);
             }
         }
+
+        input.erase(std::remove(input.begin(), input.end(), '\t'), input.end());
 
         if(token.types == type::ENDINPUT){
             break;
