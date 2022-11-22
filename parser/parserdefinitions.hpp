@@ -209,7 +209,7 @@ std::shared_ptr<funcdefinitionnode> parserclass::parseDefinition()
     } else {
         eat();
 
-         for (int i = 0; i < all_tokens.size(); i++) {
+         for (int i = 0; i < all_tokens.size(); i++) { // todo: find a more efficient approach
             if (all_tokens[i].types == type::RETURN) {
                 if (all_tokens[i+1].types != type::ENDINPUT){
                     switch(all_tokens[i+1].types){
@@ -321,7 +321,7 @@ std::shared_ptr<astnode> parserclass::primaryParserLoop()
         case type::NOTEQUAL:
             return parseBoolean();
             break;
-        case type::RETURN:  // since callvariables are parsed in codegen by just their identifier, keywords work here too
+        case type::RETURN: 
         case type::END:
             return parseCallVariable();
             break;
