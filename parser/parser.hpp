@@ -80,9 +80,6 @@ class binaryoperation : public astnode
 
         binaryoperation(const std::string operation, std::shared_ptr<astnode> right, std::shared_ptr<astnode> left) : operation(operation), right((right)), left((left)) {}
 
-        char get_operation(){
-            return operation[0]; // bandaid for switch statements.. will fix when it becomes a problem with operators like += 
-        }
         
         const virtual std::string& codegen() {}
 
