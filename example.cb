@@ -7,6 +7,6 @@ fibonacci(int n):
 end
 
 main():
-  n = 50
+  local n = 50
   fibonacci(n)
 end
