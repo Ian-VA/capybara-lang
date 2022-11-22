@@ -236,7 +236,6 @@ void compile(std::string input)
     }
 
     ostream.close();
-    system("gcc -o cap.exe cap.c");
 
 }
 
