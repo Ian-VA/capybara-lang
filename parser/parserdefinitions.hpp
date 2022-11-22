@@ -294,14 +294,6 @@ std::shared_ptr<funcdefinitionnode> parserclass::parseTopLevelExpr()
     return std::make_shared<funcdefinitionnode>((proto), (body), std::string("void"));
 }
 
-std::shared_ptr<astnode> parserclass::allOtherParse() {
-    switch(get_token().types)
-    {
-        case type::IF:
-            return parseIfStatement();
-    }
-}
-
 
 std::shared_ptr<astnode> parserclass::primaryParserLoop()
 {
@@ -309,6 +301,9 @@ std::shared_ptr<astnode> parserclass::primaryParserLoop()
     {
         case type::VAR:
             return parseVariable();
+            break;
+        case type::IF:
+            return parseIfStatement();
             break;
         case type::IDENTIFIER:
             if (peek_token().value != "(") {
