@@ -154,6 +154,11 @@ const std::string& astnode::codegen() {
             std::shared_ptr<ifstatement> gen = std::make_shared<ifstatement>(dynamic_cast<ifstatement&>(*this)); gen->codegen();
             break;
         }
+        case astnodetype::null:
+        {
+            write(this->get_value(), false);
+            break;
+        }
         default:
             write(this->get_value(), false);
             break;
@@ -168,7 +173,11 @@ const std::string& funcdefinitionnode::codegen() {
         if (!this->body.empty() || this->body[0]->get_value() != "end"){
             for(auto s : this->body) {
                 if (s->get_value() != "end"){
-                    s->codegen();
+                    if (s->get_type() == astnodetype::null) {
+                        write(s->get_value(), false);
+                    } else {
+                        s->codegen();
+                    }
 
                     if (s->get_value() != "return"){
                         write(" ", true);
@@ -189,7 +198,12 @@ const std::string& funcdefinitionnode::codegen() {
         if (!this->body.empty() || this->body[0]->get_value() != "end"){
             for(auto s : this->body) {
                 if (s->get_value() != "end"){
-                    s->codegen();
+                    if (s->get_type() == astnodetype::null) {
+                        write(s->get_value(), false);
+                    } else {
+                        s->codegen();
+                    }
+
 
                     if (s->get_value() != "return"){
                         write(" ", true);
@@ -212,6 +226,7 @@ void compile(std::string input)
     parserclass parses;
     std::deque<Token> alltokens = build_all(input); 
     parses.all_tokens = alltokens;
+
     std::deque<std::shared_ptr<astnode>> data = parses.parseAll();
 
     ostream.open("cap.c");
