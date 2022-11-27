@@ -5,6 +5,7 @@
 #include "lexer.hpp"
 #include <fstream>
 #include "parserdefinitions.hpp"
+// copyright Ian A. 2022, all rights reserved
 
 std::ofstream ostream;
 static std::vector<std::string> namedvalues = {"return", "end"}; // yes, global variables are bad
