@@ -1,6 +1,9 @@
 #ifndef PARSER_DEFINITION
 #define PARSER_DEFINITION
 
+// copyright Ian A. 2022, all rights reserved
+
+
 #include "parser.hpp"
 #include "lexer.hpp"
 #include <deque>
