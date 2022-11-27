@@ -1,5 +1,6 @@
 #ifndef LEXER_HPP
 #define LEXER_HPP
+// copyright Ian A. 2022, all rights reserved
 
 
 #include <vector>
