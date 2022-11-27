@@ -8,6 +8,7 @@
 #include <map>
 #include <array>
 
+// copyright Ian A. 2022, all rights reserved
 
 enum type
 {
