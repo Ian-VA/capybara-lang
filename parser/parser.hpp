@@ -7,6 +7,7 @@
 
 // copyright Ian A. 2022, all rights reserved
 
+
 enum astnodetype
 {
     operation,
@@ -19,7 +20,8 @@ enum astnodetype
     comparison,
     functioncall,
     functiondeclaration,
-    protonodes
+    protonodes,
+    variablecall,
 };
 
 class astnode
@@ -30,7 +32,7 @@ class astnode
             return value;
         }
 
-        virtual astnodetype get_type() const {
+        const virtual astnodetype get_type(){
             return astnodetype::null;
         }
 
@@ -50,7 +52,7 @@ class integerliteral : public astnode
         integerliteral(Token tok) : value(tok.value) {}
         integerliteral(std::string val) : value(val) {}
 
-        virtual astnodetype get_type() const override {
+        const virtual astnodetype get_type() override {
             return astnodetype::integer;
         }
 
@@ -74,13 +76,16 @@ class binaryoperation : public astnode
             return left->get_value() + operation + right->get_value();
         }
 
-        virtual astnodetype get_type() const override
+        const virtual astnodetype get_type() override
         {
             return astnodetype::operation;
         }
 
         binaryoperation(const std::string operation, std::shared_ptr<astnode> right, std::shared_ptr<astnode> left) : operation(operation), right((right)), left((left)) {}
 
+        char get_operation(){
+            return operation[0]; // bandaid for switch statements.. will fix when it becomes a problem with operators like += 
+        }
         
         const virtual std::string& codegen() {}
 
@@ -143,8 +148,8 @@ class variabledeclaration : public astnode
             }
         }
 
-        virtual astnodetype get_type() const override {
-            return astnodetype::variable;
+        const virtual astnodetype get_type() override {
+            return astnodetype::variablecall;
         }
 
         const virtual std::string& codegen();
@@ -159,6 +164,10 @@ class callvariable : public astnode
         virtual std::string get_value() const override {
             return value;
         }
+
+        const virtual astnodetype get_type() override {
+            return astnodetype::variable;
+        }
         const virtual std::string& codegen() {}
     
         callvariable(const std::string &identifier) : value(identifier) {}
@@ -171,6 +180,10 @@ class callfunctionnode : public astnode
 
     public:
         const std::string& codegen();
+
+        virtual const astnodetype get_type() override {
+            return astnodetype::functioncall;
+        }
 
         virtual std::string get_value() const override {
             return callee;
@@ -221,7 +234,7 @@ class funcdefinitionnode : public astnode
         std::shared_ptr<protonode> proto;
         const std::vector<std::shared_ptr<astnode>> getBody() {return body;}
         const std::string& codegen();
-        const virtual astnodetype get_type() {return astnodetype::functiondeclaration;}
+        const virtual astnodetype get_type() override {return astnodetype::functiondeclaration;}
         std::string getReturnType() const {return returntype;}
         funcdefinitionnode(std::shared_ptr<protonode> proto, std::vector<std::shared_ptr<astnode>> body, std::string returntype) : proto((proto)), body((body)), returntype(returntype) {}
 };
@@ -233,9 +246,9 @@ class ifstatement : public astnode
 
     public:
         std::shared_ptr<astnode> get_condition() {
-            return (condition);
+            return condition;
         }
-        const virtual astnodetype get_type() {return astnodetype::ifs;}
+        const virtual astnodetype get_type() override {return astnodetype::ifs;}
         const std::string& codegen();
         ifstatement(std::shared_ptr<astnode> condition, std::vector<std::shared_ptr<astnode>> body) : condition((condition)), body((body)) {}
 };
@@ -356,7 +369,7 @@ struct parserclass
 
         auto l = primaryParserLoop();
          
-        if (l->get_value() == "return"){
+        if (l->get_value() == "return" || l->get_type() == type::VAR){
             return l;
         }
 
