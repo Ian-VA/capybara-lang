@@ -5,7 +5,9 @@
 #include "lexer.hpp"
 #include <fstream>
 #include "parserdefinitions.hpp"
+
 // copyright Ian A. 2022, all rights reserved
+
 
 std::ofstream ostream;
 static std::vector<std::string> namedvalues = {"return", "end"}; // yes, global variables are bad
@@ -56,9 +58,8 @@ const std::string& ifstatement::codegen() {
     write("\nif(", false); this->condition->codegen();
     write("){\n", false);
 
-    for (int i = 0; i < this->body.size()-1; i++){
-        std::shared_ptr<astnode> j = this->body[i];
-        j->codegen(); write(" ", false);
+    for (auto i : this->body){
+        i->codegen(); write(" ", true);
     }
 
     write("\n}", false);
@@ -152,7 +153,7 @@ const std::string& astnode::codegen() {
         }
         case astnodetype::ifs:
         {
-            std::shared_ptr<ifstatement> gen = std::make_shared<ifstatement>(dynamic_cast<ifstatement&>(*this)); gen->codegen();
+            std::shared_ptr<ifstatement> g = std::make_shared<ifstatement>(dynamic_cast<ifstatement&>(*this)); g->codegen();
             break;
         }
         case astnodetype::null:
@@ -237,6 +238,7 @@ void compile(std::string input)
     }
 
     ostream.close();
+    system("gcc -o cap.exe cap.c");
 
 }
 
