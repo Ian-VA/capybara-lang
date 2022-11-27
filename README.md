@@ -58,3 +58,7 @@ Currently, Capybara can't be built using cmake. Cloning this repository is a via
 ### How do I contribute?
 
 We need testers! Please make an Issue if you come across an error or a PR if you know how to fix it. Capybara is still in early development.
+
+### How do I use capybara?
+
+Capybara operates via a console. To make a capybara file, write a piece of capybara-syntax-compliant code with the file extension ".cb". Then, in the capybara console, type "compile (your_file_name)" without the .cb file extension and capybara will automatically find the file and compile it. Then, to run the file, type "run". The run command runs the previously compiled file.
