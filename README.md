@@ -37,9 +37,9 @@ Capybara is meant to provide the best of both worlds, allowing both high level a
 Here's an example of some code in Capybara:
 
 ```python
-show(int x1, ptr int x2): # all function arguments must be statically typed
+add(int x1, ptr int x2): # all function arguments must be statically typed
   x2++ # capybara allows for pointer arithmetic
-  return x1
+  return x1 + *x2 # pointers are still dereferenced like normal
 end
 
 main():
