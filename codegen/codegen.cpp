@@ -55,11 +55,15 @@ void encounteredEnd() {
 }
 
 const std::string& ifstatement::codegen() {
-    write("\nif(", false); this->condition->codegen();
+    write("\nif(", false); write(this->get_condition()->get_value(), false);
     write("){\n", false);
 
     for (auto i : this->body){
-        i->codegen(); write(" ", true);
+        if (i == this->body[body.size() - 1]) {
+            i->codegen(); write (" ", false);
+        } else {
+            i->codegen(); write(" ", true);
+        }
     }
 
     write("\n}", false);
@@ -96,7 +100,17 @@ const std::string& variabledeclaration::codegen() {
         out.push_back(this->get_value().size());
         write(out + "]" + this->get_identifier() + "=" + this->get_value(), false);
     } else {
-        write(this->getvariabletype() + " " + this->get_identifier() + "=" + this->get_value(), false);
+        write(this->getvariabletype() + " ", false);
+
+        for (auto i : this->get_keywords()) {
+            if (i == "ptr") {
+                write("*", false);
+            } else {
+                write("&", false);
+            }
+        }
+
+        write(this->get_identifier() + "=" + this->get_value(), false);
     }
 }
 
@@ -181,7 +195,8 @@ const std::string& funcdefinitionnode::codegen() {
                         s->codegen();
                     }
 
-                    if (s->get_value() != "return"){
+
+                    if (s->get_value() != "return" && s->get_type() != astnodetype::ifs){
                         write(" ", true);
                     } else {
                         write(" ", false);
