@@ -3,10 +3,6 @@
 #include <vector>
 #include "classes.hpp"
 #include <iostream>
-<<<<<<< HEAD
-
-=======
->>>>>>> 8c4ac030fef114cdc84582cee1738729e21975fe
 // copyright Ian A. 2022, all rights reserved
 
 void print_tokens(std::vector<Token> all_tokens)
@@ -39,8 +35,4 @@ bool check_if_bool(Token token)
 
 
 
-<<<<<<< HEAD
 #endif
-=======
-#endif
->>>>>>> 8c4ac030fef114cdc84582cee1738729e21975fe

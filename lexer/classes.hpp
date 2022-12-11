@@ -3,10 +3,6 @@
 #include <vector>
 #include <iostream>
 #include <string>
-<<<<<<< HEAD
-=======
-#include <string_view>
->>>>>>> 8c4ac030fef114cdc84582cee1738729e21975fe
 #include <regex>
 #include <map>
 #include <array>
@@ -18,10 +14,7 @@ enum type
     ASSIGN,
     COMPARE,
     ARGSEPARATE,
-<<<<<<< HEAD
     STRING,
-=======
->>>>>>> 8c4ac030fef114cdc84582cee1738729e21975fe
     NUM,
     AND,
     PLUS,
@@ -36,15 +29,12 @@ enum type
     GREATERTHANOREQUALTO,
     XOR,
     IF,
-<<<<<<< HEAD
     END,
     BEGIN,
     MAIN,
     INTEGER,
     CHAR,
     BOOLEAN,
-=======
->>>>>>> 8c4ac030fef114cdc84582cee1738729e21975fe
     ELSEIF,
     ELSE,
     TIMESEQUALS,
@@ -65,13 +55,9 @@ enum type
     LCURLY,
     ENDINPUT,
     FUNC,
-<<<<<<< HEAD
     CONST,
     DEREFERENCE,
     POINTER
-=======
-    CONST
->>>>>>> 8c4ac030fef114cdc84582cee1738729e21975fe
 };
 
 struct Token
@@ -86,11 +72,7 @@ class LEXER
 {
     public:
         char ahead;
-<<<<<<< HEAD
         std::string m_input;
-=======
-        std::string_view m_input;
->>>>>>> 8c4ac030fef114cdc84582cee1738729e21975fe
         Token m_last_token;
         int m_index = 0;
         size_t m_size;
@@ -100,11 +82,7 @@ class LEXER
                 char r = m_input[m_index];
                 return r;
             } 
-<<<<<<< HEAD
             return 'e';
-=======
-            return ' ';
->>>>>>> 8c4ac030fef114cdc84582cee1738729e21975fe
         }
 
 
