@@ -1,8 +1,14 @@
 #ifndef LEXER_HPP
 #define LEXER_HPP
+<<<<<<< HEAD
 
 // copyright Ian A. 2022, all rights reserved
 
+=======
+// copyright Ian A. 2022, all rights reserved
+
+
+>>>>>>> 8c4ac030fef114cdc84582cee1738729e21975fe
 #include <vector>
 #include <iostream>
 #include <string>
@@ -29,9 +35,13 @@ std::map<std::string, type> mapStringtoType = {
     {"str", type::STRING},
     {"int", type::INTEGER},
     {"char", type::CHAR},
+<<<<<<< HEAD
     {"bool", type::BOOLEAN},
     {"ptr", type::POINTER},
     {"ref", type::REFERENCE}
+=======
+    {"bool", type::BOOLEAN}
+>>>>>>> 8c4ac030fef114cdc84582cee1738729e21975fe
 };
 
 
@@ -241,7 +251,11 @@ std::deque<Token> build_all(std::string file)
     lexer_object.m_index = 0;
     std::deque<Token> all_tokens;
     input.erase(std::remove_if(input.begin(), input.end(), ::isspace), input.end());
+<<<<<<< HEAD
     // std::cout << "INPUT: " << input << "\n";
+=======
+    std::cout << "INPUT: " << input << "\n";
+>>>>>>> 8c4ac030fef114cdc84582cee1738729e21975fe
 
     while (true)
     {
@@ -271,4 +285,8 @@ std::deque<Token> build_all(std::string file)
 }
 
 
+<<<<<<< HEAD
 #endif
+=======
+#endif
+>>>>>>> 8c4ac030fef114cdc84582cee1738729e21975fe

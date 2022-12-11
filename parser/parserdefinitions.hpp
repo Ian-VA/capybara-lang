@@ -1,8 +1,17 @@
+<<<<<<< HEAD
 // copyright Ian A. 2022, all rights reserved
 
 #ifndef PARSER_DEFINITION
 #define PARSER_DEFINITION
 
+=======
+#ifndef PARSER_DEFINITION
+#define PARSER_DEFINITION
+
+// copyright Ian A. 2022, all rights reserved
+
+
+>>>>>>> 8c4ac030fef114cdc84582cee1738729e21975fe
 #include "parser.hpp"
 #include "lexer.hpp"
 #include <deque>
@@ -28,8 +37,13 @@ std::shared_ptr<ifstatement> parserclass::parseIfStatement()
 
     eat(); 
     auto boolean = parseExpression();
+<<<<<<< HEAD
     eat(); 
     std::cout << boolean->get_value() << "\n";
+=======
+    eat(); // :
+
+>>>>>>> 8c4ac030fef114cdc84582cee1738729e21975fe
     while (true)
     {
         if (auto e = parseExpression()) {
@@ -46,6 +60,10 @@ std::shared_ptr<ifstatement> parserclass::parseIfStatement()
         }
     }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 8c4ac030fef114cdc84582cee1738729e21975fe
     return std::make_shared<ifstatement>(boolean, body);
     
 }
@@ -67,6 +85,7 @@ std::shared_ptr<variabledeclaration> parserclass::parseVariable()
 {
   if (get_token().types == type::VAR){
     eat(); // eat var
+<<<<<<< HEAD
     std::vector<std::string> keywords;
 
     if (get_token().types == type::REFERENCE || get_token().types == type::POINTER) {
@@ -74,6 +93,9 @@ std::shared_ptr<variabledeclaration> parserclass::parseVariable()
         eat();
     }
 
+=======
+      
+>>>>>>> 8c4ac030fef114cdc84582cee1738729e21975fe
     if (get_token().types != type::IDENTIFIER){
         error {curr_line, "Expected identifier, found unknown token", ""};
     } else {
@@ -86,7 +108,11 @@ std::shared_ptr<variabledeclaration> parserclass::parseVariable()
         }
             
         eat();
+<<<<<<< HEAD
         return std::make_shared<variabledeclaration>(std::string("placeholder"), value, identifier, keywords);
+=======
+        return std::make_shared<variabledeclaration>(std::string("placeholder"), value, identifier);
+>>>>>>> 8c4ac030fef114cdc84582cee1738729e21975fe
       }
   }
 }
@@ -216,7 +242,11 @@ std::shared_ptr<funcdefinitionnode> parserclass::parseDefinition()
     } else {
         eat();
 
+<<<<<<< HEAD
          for (int i = 0; i < all_tokens.size(); i++) {
+=======
+         for (int i = 0; i < all_tokens.size(); i++) { // todo: find a more efficient approach
+>>>>>>> 8c4ac030fef114cdc84582cee1738729e21975fe
             if (all_tokens[i].types == type::RETURN) {
                 if (all_tokens[i+1].types != type::ENDINPUT){
                     switch(all_tokens[i+1].types){
@@ -328,7 +358,11 @@ std::shared_ptr<astnode> parserclass::primaryParserLoop()
         case type::NOTEQUAL:
             return parseBoolean();
             break;
+<<<<<<< HEAD
         case type::RETURN:  // since callvariables are parsed in codegen by just their identifier, keywords work here too
+=======
+        case type::RETURN: 
+>>>>>>> 8c4ac030fef114cdc84582cee1738729e21975fe
         case type::END:
             return parseCallVariable();
             break;
@@ -364,4 +398,8 @@ std::deque<std::shared_ptr<astnode>> parserclass::parseAll()
     return allnodes;
 }
 
+<<<<<<< HEAD
 #endif
+=======
+#endif
+>>>>>>> 8c4ac030fef114cdc84582cee1738729e21975fe
