@@ -15,7 +15,7 @@ void print_tokens(std::vector<Token> all_tokens)
 
 }
 
-bool isNumber(const std::string& s)
+bool isNumber(const std::string& s) // i should probably get rid of this
 {
     for (char const &ch : s) {
         if (std::isdigit(ch) == 0)

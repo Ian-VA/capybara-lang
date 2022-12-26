@@ -4,11 +4,6 @@
 
 // copyright Ian A. 2022, all rights reserved
 
-=======
-// copyright Ian A. 2022, all rights reserved
-
-
->>>>>>> 8c4ac030fef114cdc84582cee1738729e21975fe
 #include <vector>
 #include <iostream>
 #include <string>
