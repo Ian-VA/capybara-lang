@@ -1,10 +1,10 @@
 #include <cctype>
 #include <vector>
 #include <string>
-#include "parser.hpp"
-#include "lexer.hpp"
+#include "parser/parser.hpp"
+#include "parser/lexer/lexer.hpp"
 #include <fstream>
-#include "parserdefinitions.hpp"
+#include "parser/parserdefinitions.hpp"
 
 // copyright Ian A. 2022, all rights reserved
 
@@ -145,6 +145,12 @@ const std::string& protonode::codegen(){
 const std::string& astnode::codegen() {
     switch(this->get_type())
     {
+        case astnodetype::variablecall:
+        {
+            std::cout << "called" << "\n";
+            write(this->get_value(), false);
+            break;
+        }
         case astnodetype::functiondeclaration:
         {
             std::shared_ptr<funcdefinitionnode> gen = std::make_shared<funcdefinitionnode>(dynamic_cast<funcdefinitionnode&>(*this)); gen->codegen();
@@ -189,7 +195,7 @@ const std::string& funcdefinitionnode::codegen() {
         if (!this->body.empty() || this->body[0]->get_value() != "end"){
             for(auto s : this->body) {
                 if (s->get_value() != "end"){
-                    if (s->get_type() == astnodetype::null) {
+                    if (s->get_type() == astnodetype::null || s->get_value() == "return" || s->get_type() == astnodetype::operation) {
                         write(s->get_value(), false);
                     } else {
                         s->codegen();
@@ -215,7 +221,7 @@ const std::string& funcdefinitionnode::codegen() {
         if (!this->body.empty() || this->body[0]->get_value() != "end"){
             for(auto s : this->body) {
                 if (s->get_value() != "end"){
-                    if (s->get_type() == astnodetype::null) {
+                    if (s->get_type() == astnodetype::null || s->get_value() == "return" || s->get_type() == astnodetype::operation) {
                         write(s->get_value(), false);
                     } else {
                         s->codegen();
@@ -275,6 +281,8 @@ int main()
                 compile(input);
             } else if (input == "run") {
                 run();
+            } else {
+                std::cout << "Invalid command" << "\n";
             }
         }
     }
