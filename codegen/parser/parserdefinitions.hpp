@@ -290,6 +290,12 @@ std::shared_ptr<funcdefinitionnode> parserclass::parseDefinition()
     }
 }
 
+std::shared_ptr<usenode> parserclass::parseUse()
+{
+    eat(); std::string directory = get_token().value;
+    eat();
+}
+
 std::shared_ptr<funcdefinitionnode> parserclass::parseTopLevelExpr()
 {
     std::vector<std::shared_ptr<astnode>> body;
@@ -352,6 +358,12 @@ std::deque<std::shared_ptr<astnode>> parserclass::parseAll()
 
     while (true)
     {
+
+        while (get_token().value == "use")
+        {
+            std::shared_ptr<astnode> uses = parseUse();
+        }
+
         std::shared_ptr<astnode> data = parseDefinition();
         allnodes.push_back(data);
 

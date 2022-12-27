@@ -1,3 +1,5 @@
+#include "capstd/print.h"
+
 int func(int xy,int xa){
 return xy+xa ;
 }

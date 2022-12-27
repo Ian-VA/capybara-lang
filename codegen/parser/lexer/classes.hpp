@@ -57,7 +57,8 @@ enum type
     FUNC,
     CONST,
     DEREFERENCE,
-    POINTER
+    POINTER,
+    USE
 };
 
 struct Token

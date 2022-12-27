@@ -1,7 +1,8 @@
+use capstd/print
+
 func(int xy, int xa):
     return xy+xa
 end
-
 
 balls(int x):
 

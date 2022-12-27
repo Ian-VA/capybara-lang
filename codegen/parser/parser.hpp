@@ -21,6 +21,7 @@ enum astnodetype
     functioncall,
     functiondeclaration,
     protonodes,
+    use,
     variablecall,
 };
 
@@ -173,6 +174,25 @@ class callvariable : public astnode
         const virtual std::string& codegen() {}
     
         callvariable(const std::string &identifier) : value(identifier) {}
+};
+
+class usenode : public astnode
+{
+    private:
+        std::string directory;
+    public:
+        virtual std::string get_value() const override {
+            return directory;
+        }
+
+        const virtual astnodetype get_type() override {
+            return astnodetype::use;
+        }
+
+        const virtual std::string& codegen() {}
+    
+        usenode(const std::string &directory) : directory(directory) {}
+
 };
 
 class callfunctionnode : public astnode 
@@ -329,6 +349,7 @@ struct parserclass
     std::shared_ptr<funcdefinitionnode> parseTopLevelExpr();
     std::shared_ptr<astnode> primaryParserLoop();
     std::shared_ptr<astnode> allOtherParse();
+    std::shared_ptr<usenode> parseUse();
     std::deque<std::shared_ptr<astnode>> parseAll();
     
     std::shared_ptr<astnode> parseOperationRHS(int exprprec, std::shared_ptr<astnode> l) { // l here being a parsed identifier or number (anything else is returned automatically)

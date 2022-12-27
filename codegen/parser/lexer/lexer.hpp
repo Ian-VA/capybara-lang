@@ -7,6 +7,7 @@
 #include <iostream>
 #include <string>
 #include <string_view>
+#include <algorithm>
 #include "classes.hpp"
 #include "utilfunctions.hpp"
 #include <fstream>
@@ -31,7 +32,8 @@ std::map<std::string, type> mapStringtoType = {
     {"char", type::CHAR},
     {"bool", type::BOOLEAN},
     {"ptr", type::POINTER},
-    {"ref", type::REFERENCE}
+    {"ref", type::REFERENCE},
+    {"use", type::USE}
 };
 
 
@@ -53,7 +55,9 @@ Token unique_objects(char current_char, std::string_view input, int index)
                     return Token {type::REFERENCE, "&"};
             }
     }
+
     return Token {type::ENDINPUT, "EOF"};
+    
 }
 
 Token check_if_keyword(std::string input)
@@ -75,6 +79,9 @@ Token check_if_keyword(std::string input)
         case type::INTEGER:
         case type::STRING:
         case type::BOOLEAN:
+        case type::POINTER:
+        case type::REFERENCE:
+        case type::USE:
             return Token {Type, input};
         default:
             return Token {type::IDENTIFIER, input};
@@ -119,6 +126,8 @@ Token build_token(std::string_view input)
     } else if (lexer_obj.current_char() == '"') {
         lexer_obj.advance();
         return Token {type::STRING, "placeholder"};
+    } else if (lexer_obj.current_char() == '\n') {
+        lexer_obj.advance();
     }
 
     switch(lexer_obj.current_char())
@@ -223,7 +232,8 @@ Token build_token(std::string_view input)
         case '\t':
             lexer_obj.advance();
         default:
-            return unique_objects(lexer_obj.current_char(), lexer_obj.m_input, lexer_obj.m_index);
+            lexer_obj.advance();
+
     }
 
 }
@@ -240,8 +250,12 @@ std::deque<Token> build_all(std::string file)
     LEXER lexer_object;
     lexer_object.m_index = 0;
     std::deque<Token> all_tokens;
-    input.erase(std::remove_if(input.begin(), input.end(), ::isspace), input.end());
     // std::cout << "INPUT: " << input << "\n";
+
+    std::replace(input.begin(), input.end(), '\n', ' ');
+    std::replace(input.begin(), input.end(), '\t', ' ');
+
+    // std::cout << std::endl;
 
     while (true)
     {
@@ -253,12 +267,11 @@ std::deque<Token> build_all(std::string file)
         if (position != std::string::npos){
             input.erase(position, token.value.length());
 
-            if (input[0] == ' '){
+            while (input[0] == ' '){
                 input.erase(0, 1);
             }
         }
 
-        input.erase(std::remove(input.begin(), input.end(), '\t'), input.end());
 
         if(token.types == type::ENDINPUT){
             break;
