@@ -142,12 +142,17 @@ const std::string& protonode::codegen(){
 
 }
 
+const std::string& usenode::codegen() {
+    std::string incl = "#include "; incl.push_back('"'); incl += this->get_value(); incl += ".h"; incl.push_back('"');
+    write(incl, false);
+    write("\n", false);
+}
+
 const std::string& astnode::codegen() {
     switch(this->get_type())
     {
         case astnodetype::variablecall:
         {
-            std::cout << "called" << "\n";
             write(this->get_value(), false);
             break;
         }
@@ -174,6 +179,11 @@ const std::string& astnode::codegen() {
         case astnodetype::ifs:
         {
             std::shared_ptr<ifstatement> g = std::make_shared<ifstatement>(dynamic_cast<ifstatement&>(*this)); g->codegen();
+            break;
+        }
+        case astnodetype::use:
+        {
+            std::shared_ptr<usenode> g = std::make_shared<usenode>(dynamic_cast<usenode&>(*this)); g->codegen();
             break;
         }
         case astnodetype::null:

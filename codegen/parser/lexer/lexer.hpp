@@ -16,6 +16,7 @@
 #include <map>
 #include <array>
 
+
 std::map<std::string, type> mapStringtoType = {
     {"true", type::TRUE},
     {"false", type::FALSE},
@@ -110,8 +111,8 @@ Token build_token(std::string_view input)
         return Token {type::NUM, digit};
 
     } else if (isalpha(lexer_obj.current_char())){
-        std::string all_input; // local
-        all_input.push_back(lexer_obj.current_char()); // l 
+        std::string all_input; 
+        all_input.push_back(lexer_obj.current_char()); 
         
         while (isalpha(lexer_obj.peek()) || std::isdigit(lexer_obj.peek()))
         {
@@ -125,7 +126,17 @@ Token build_token(std::string_view input)
         return check_if_keyword(all_input);
     } else if (lexer_obj.current_char() == '"') {
         lexer_obj.advance();
-        return Token {type::STRING, "placeholder"};
+        std::string content; content.push_back('"');
+
+        while (lexer_obj.current_char() != '"') 
+        {
+            content.push_back(lexer_obj.current_char());
+            lexer_obj.advance();
+        }
+
+        lexer_obj.advance(); content.push_back('"');
+        
+        return Token {type::IDENTIFIER, content};
     } else if (lexer_obj.current_char() == '\n') {
         lexer_obj.advance();
     }
@@ -250,12 +261,11 @@ std::deque<Token> build_all(std::string file)
     LEXER lexer_object;
     lexer_object.m_index = 0;
     std::deque<Token> all_tokens;
-    // std::cout << "INPUT: " << input << "\n";
 
     std::replace(input.begin(), input.end(), '\n', ' ');
     std::replace(input.begin(), input.end(), '\t', ' ');
 
-    // std::cout << std::endl;
+    std::cout << "Compiling..." << "\n";
 
     while (true)
     {
@@ -263,6 +273,8 @@ std::deque<Token> build_all(std::string file)
         size_t position = input.find(token.value);
 
         all_tokens.push_back(token);
+
+        std::cout << token.value << "\n";
 
         if (position != std::string::npos){
             input.erase(position, token.value.length());
@@ -272,6 +284,7 @@ std::deque<Token> build_all(std::string file)
             }
         }
 
+        
 
         if(token.types == type::ENDINPUT){
             break;

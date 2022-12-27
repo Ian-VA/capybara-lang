@@ -19,6 +19,18 @@ char *convert(unsigned int num, int base)
     return (ptr);
 }
 
+int scan(char* str, ...)
+{
+    va_list vl;
+    int i, j, ret = 0;
+
+    char buff[100] = {0}, tmp[20], c, *out_loc;
+
+    while (c != ' ') {if (fread(&c, 1, 1, stdin)) {buff[i] = c; i++;}}
+    va_start(vl, str); i = 0;
+
+}
+
 void print(char* format, ...)
 {
     char *traverse, *s;
@@ -27,7 +39,7 @@ void print(char* format, ...)
     va_list arg; va_start(arg, format);
 
     for (traverse = format; *traverse != '\0'; traverse++) {
-        while (*traverse != '%') {putchar(*traverse); traverse++;}
+        while (*traverse != '%') {if (*traverse == '\0') return; putchar(*traverse); traverse++;}
 
         traverse++;
 
@@ -44,5 +56,8 @@ void print(char* format, ...)
         }
     }
 
+    putchar('\r');
+    putchar('\n'); // gotta be pythonic 
     va_end(arg);
 }
+

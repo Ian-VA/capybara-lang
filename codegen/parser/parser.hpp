@@ -189,7 +189,7 @@ class usenode : public astnode
             return astnodetype::use;
         }
 
-        const virtual std::string& codegen() {}
+        const virtual std::string& codegen();
     
         usenode(const std::string &directory) : directory(directory) {}
 
