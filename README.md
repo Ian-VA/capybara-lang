@@ -30,7 +30,7 @@ Capybara is meant to provide the best of both worlds, allowing both high level a
 * Power and Speed
 * Dynamic typing
 * Portability
-* Memory Management
+* Memory Management (Don't worry, its not required)
 * Compatibility with new technology
 * and a lot more!
 
