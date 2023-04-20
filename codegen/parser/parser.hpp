@@ -5,7 +5,7 @@
 #include "lexer/utilfunctions.hpp"
 #include <deque>
 
-// copyright Ian A. 2022, all rights reserved
+// copyright Ian A. 2023, all rights reserved
 
 
 enum astnodetype
