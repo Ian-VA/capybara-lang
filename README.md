@@ -4,7 +4,9 @@
 
 ![image](https://img.shields.io/badge/contributors-1-yellow) ![image](https://img.shields.io/badge/commits-171-yellow) ![image](https://img.shields.io/badge/status-functional-brightgreen)
 
-### :heavy_exclamation_mark:	As of November 15th, 2022, Capybara has achieved beta status :heavy_exclamation_mark:	
+### :heavy_exclamation_mark:	As of May 1st, 2023, Capybara has been archived :heavy_exclamation_mark:	
+
+### Capybara was a small passion project written over the summer, and I am now developing a proper programming language with actual thought taken into its design using industry standard tools. This repository is kept public as a reminder of my mistakes, horrible design patterns (if any), bad language design, and as a learning opportunity for anyone trying to do the same thing.
 
 ### About Capybara
 
@@ -51,13 +53,7 @@ end
 
 ### Where do I get Capybara?
 
-:warning: Capybara is currently too early in its development for it to be viable in a production setting. Capybara should only be meant for hobbyist use until it has been decreed stable enough to warrant otherwise. :warning:
-
 Currently, Capybara can't be built using cmake. Cloning this repository is a viable way to experiment with the early version of Capybara.
-
-### How do I contribute?
-
-We need testers! Please make an Issue if you come across an error or a PR if you know how to fix it. Capybara is still in early development.
 
 ### How do I use capybara?
 
