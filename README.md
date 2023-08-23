@@ -4,7 +4,7 @@
 
 ![image](https://img.shields.io/badge/contributors-1-yellow) ![image](https://img.shields.io/badge/commits-171-yellow) ![image](https://img.shields.io/badge/status-functional-brightgreen)
 
-### :heavy_exclamation_mark:	As of May 1st, 2023, Capybara has been archived :heavy_exclamation_mark:	
+### :heavy_exclamation_mark:	As of August 23rd, 2023, Capybara has been archived :heavy_exclamation_mark:	
 
 ### Capybara was a small passion project written over the summer of 2022 (one of many), and I am now developing a proper programming language with actual thought taken into its design using industry standard tools. This repository is kept public as a reminder of my mistakes, horrible design patterns (if any), bad language design, and as a learning opportunity for anyone trying to do the same thing.
 
